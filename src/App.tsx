@@ -1,98 +1,71 @@
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-} from "./components/ui/carousel";
-import { VideoFeed } from "@/VideoFeed.tsx";
-import { useEffect, useState } from "react";
-import { useMedia } from "@/components/UseMedia.ts";
+import { BrowserRouter, NavLink, Route, Routes } from "react-router";
 import { ListVideo, SlidersHorizontal, User } from "lucide-react";
+import { HomeFeed } from "@/pages/HomeFeed.tsx";
+import { ProfilePage } from "@/pages/ProfilePage.tsx";
+import { SettingsPage } from "@/pages/SettingsPage.tsx";
 
-function App() {
-  const [api, setApi] = useState<CarouselApi>();
-  const [currentSlide, setCurrentSlide] = useState<number>();
-
-  const { loadMore, videos } = useMedia();
-
-  useEffect(() => {
-    if (!currentSlide) {
-      return;
-    }
-
-    if (currentSlide >= videos.length - 2) {
-      loadMore();
-    }
-  }, [currentSlide, loadMore, videos.length]);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    api.on("select", () => {
-      setCurrentSlide(api.selectedScrollSnap());
-    });
-  }, [api]);
-
+const App = () => {
   return (
-    <>
-      <Carousel
-        opts={{
-          align: "start",
-        }}
-        orientation="vertical"
-        className="w-full"
-        setApi={setApi}
-      >
-        <CarouselContent className={"h-[calc(100vh-4rem)]"}>
-          <VideoFeed videos={videos} />
-        </CarouselContent>
-      </Carousel>
-      <div className="z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-        <div className="grid h-full max-w-lg grid-cols-3 mx-auto">
-          <button
-            type="button"
-            className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <SlidersHorizontal
-              className={
-                "w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
+    <BrowserRouter>
+      <div className="flex flex-col h-screen">
+        {/* Main Content */}
+        <div className="h-[calc(100vh-4rem)]">
+          <Routes>
+            <Route path="/home" element={<HomeFeed />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Routes>
+        </div>
+
+        <div className="z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+          <div className="grid h-full max-w-lg grid-cols-3 mx-auto p-2">
+            <NavLink
+              className={({ isActive }) =>
+                `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`
               }
-            />
-            <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-              Einstellungen
-            </span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <ListVideo
-              className={
-                "w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
-              }
-            />
-            <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-              Feed
-            </span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <User
-              className={
-                "w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
-              }
-            />
-            <span className="text-sm max-w-28 truncate text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-              JuiceCS
-            </span>
-          </button>
+              to={"settings"}
+            >
+              <button
+                type="button"
+                className="inline-flex flex-col items-center justify-center font-medium px-5 group"
+              >
+                <SlidersHorizontal className={"w-5 h-5 mb-1"} />
+                <span className="text-sm">Einstellungen</span>
+              </button>
+            </NavLink>
+            <NavLink
+              className={({ isActive }) => {
+                return `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`;
+              }}
+              to={"home"}
+            >
+              <button
+                type="button"
+                className="inline-flex flex-col items-center justify-center font-medium px-5 group"
+              >
+                <ListVideo className={"w-5 h-5 mb-1"} />
+                <span className="text-sm">Feed</span>
+              </button>
+            </NavLink>
+            <NavLink
+              className={({ isActive }) => {
+                return `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`;
+              }}
+              to={"profile"}
+            >
+              <button
+                type="button"
+                className="inline-flex flex-col items-center justify-center font-medium px-5 group"
+              >
+                <User className={"w-5 h-5 mb-1"} />
+                <span className="text-sm max-w-28 truncate">JuiceCS</span>
+              </button>
+            </NavLink>
+          </div>
         </div>
       </div>
-    </>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
