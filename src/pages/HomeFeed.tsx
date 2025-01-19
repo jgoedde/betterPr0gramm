@@ -1,96 +1,69 @@
-import { useEffect, useState } from "react";
 import {
     Carousel,
     CarouselApi,
     CarouselContent,
+    CarouselItem,
 } from "@/components/ui/carousel.tsx";
+import { Video } from "@/components/Video.tsx";
 import { useMedia } from "@/components/UseMedia.ts";
-import { VideoFeed } from "@/VideoFeed.tsx";
-import { ListVideo, SlidersHorizontal, User } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export function HomeFeed() {
+    const { videos } = useMedia();
     const [api, setApi] = useState<CarouselApi>();
-    const [currentSlide, setCurrentSlide] = useState<number>();
+    const [currentSlide, setCurrentSlide] = useState<number>(0);
+    const [renderedVideos, setRenderedVideos] = useState(videos.slice(0, 3)); // Initially render 3 videos
 
-    const { loadMore, videos } = useMedia();
-
+    //#region Seed renderedVideos arr
     useEffect(() => {
-        if (!currentSlide) {
-            return;
+        if (renderedVideos.length === 0 && videos.length > 0) {
+            setRenderedVideos(videos.slice(0, 3));
         }
+    }, [renderedVideos.length, videos]);
+    //#endregion
 
-        if (currentSlide >= videos.length - 2) {
-            loadMore();
-        }
-    }, [currentSlide, loadMore, videos.length]);
+    const appendVideos = useCallback(() => {
+        const nextIndex = currentSlide + 1;
+        const nextBatch = videos.slice(0, nextIndex + 2); // Load the current, next, and one more video
+        setRenderedVideos(nextBatch);
+    }, [currentSlide, videos]);
 
     useEffect(() => {
         if (!api) {
             return;
         }
 
-        api.on("select", () => {
-            setCurrentSlide(api.selectedScrollSnap());
-        });
-    }, [api]);
+        const setCurrentSlideIndex = () => {
+            setCurrentSlide(api.selectedScrollSnap() + 1);
+        };
+
+        setCurrentSlideIndex();
+
+        api.on("select", setCurrentSlideIndex);
+        api.on("settle", appendVideos);
+
+        return () => {
+            api.off("settle", appendVideos);
+            api.off("select", setCurrentSlideIndex);
+        };
+    }, [api, currentSlide, videos, appendVideos]);
 
     return (
-        <>
-            <Carousel
-                opts={{
-                    align: "start",
-                }}
-                orientation="vertical"
-                className="w-full"
-                setApi={setApi}
-            >
-                <CarouselContent className={"h-[calc(100vh-4rem)]"}>
-                    <VideoFeed videos={videos} />
-                </CarouselContent>
-            </Carousel>
-            <div className="z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
-                <div className="grid h-full max-w-lg grid-cols-3 mx-auto">
-                    <button
-                        type="button"
-                        className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-                    >
-                        <SlidersHorizontal
-                            className={
-                                "w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
-                            }
-                        />
-                        <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-                            Einstellungen
-                        </span>
-                    </button>
-                    <button
-                        type="button"
-                        className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-                    >
-                        <ListVideo
-                            className={
-                                "w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
-                            }
-                        />
-                        <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-                            Feed
-                        </span>
-                    </button>
-                    <button
-                        type="button"
-                        className="inline-flex flex-col items-center justify-center font-medium px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-                    >
-                        <User
-                            className={
-                                "w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"
-                            }
-                        />
-                        <span className="text-sm max-w-28 truncate text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
-                            JuiceCS
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </>
+        <Carousel
+            opts={{
+                align: "start",
+            }}
+            orientation="vertical"
+            className="w-full"
+            setApi={setApi}
+        >
+            <CarouselContent className={"h-[calc(100vh-4rem)]"}>
+                {renderedVideos.map((video) => (
+                    <CarouselItem key={video.id} className="relative">
+                        <Video upload={video} />
+                    </CarouselItem>
+                ))}
+            </CarouselContent>
+        </Carousel>
     );
 }

@@ -1,46 +1,49 @@
 import { Upload } from "@/Upload.ts";
-import video1 from "/test1.mp4";
-import video2 from "/test2.mp4";
-import video3 from "/test3.mp4";
-import { useCallback, useState } from "react";
+import { useMemo } from "react";
+import useSWR from "swr";
+
+type ItemResponse = {
+    id: number;
+    up: number;
+    down: number;
+    created: number;
+    image: string;
+    user: string;
+};
+
+type GetPostsResponse = {
+    items: ItemResponse[];
+};
 
 export function useMedia() {
-    const [videos, setVideos] = useState<Upload[]>([
-        {
-            id: "123",
-            src: video1,
-            benis: 314,
-            topTag: "Mit Essen spielt man",
-            uploaderName: "RundesBalli",
-            commentsCount: 23,
-            uploadedAt: new Date(2024, 2, 2, 3, 2, 1),
-        },
-        {
-            id: "124",
-            src: video2,
-            benis: 23,
-            topTag: "Oile",
-            uploaderName: "JuiceCS",
-            uploadedAt: new Date(2024, 7, 2, 3, 2, 1),
-            commentsCount: 23,
-        },
-        {
-            id: "125",
-            src: video3,
-            benis: 121,
-            topTag: "Umfall",
-            uploaderName: "Gaamb",
-            commentsCount: 23,
-            uploadedAt: new Date(2024, 11, 2, 3, 2, 1),
-        },
-    ]);
+    const { data } = useSWR("neu", async () => {
+        //        const { data } = useSWR("beliebt", async () => {
+        const response = await fetch(
+            "https://pr0gramm.com/api/items/get?flags=1",
+            // "https://pr0gramm.com/api/items/get?flags=1&promoted=1&show_junk=0",
+            {
+                method: "GET",
+            }
+        );
 
-    const loadMore = useCallback(() => {
-        setVideos((prev) => [
-            ...prev,
-            { ...prev[0], id: `${Math.floor(Math.random() * 1000)}` },
-        ]);
-    }, []);
+        return (await response.json()) as GetPostsResponse;
+    });
 
-    return { videos, loadMore };
+    function toUpload(res: ItemResponse): Upload {
+        return {
+            id: res.id,
+            src: `https://vid.pr0gramm.com/${res.image}`,
+            uploadedAt: new Date(Number(res.created + "000")),
+            uploaderName: res.user,
+            benis: res.up - res.down,
+        };
+    }
+
+    const videos = useMemo<Upload[]>(() => {
+        const videoResponses =
+            data?.items.filter((media) => media.image.includes(".mp4")) ?? [];
+        return videoResponses.map(toUpload);
+    }, [data?.items]);
+
+    return { videos };
 }

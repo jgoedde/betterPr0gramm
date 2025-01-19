@@ -1,7 +1,5 @@
 export type Upload = {
-    id: string;
-    commentsCount: number;
-    topTag: string;
+    id: number;
     src: string;
     benis: number;
     uploaderName: string;

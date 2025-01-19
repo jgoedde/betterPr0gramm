@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-type Foo = {
+type CaptchaResponse = {
     token: string;
     captcha: string;
     ts: number;
@@ -10,7 +10,7 @@ type Foo = {
 };
 
 function useCaptcha() {
-    const [captcha, setCaptcha] = useState<Foo>();
+    const [captcha, setCaptcha] = useState<CaptchaResponse>();
 
     const fetchCaptcha = useCallback(async () => {
         const response = await fetch(
