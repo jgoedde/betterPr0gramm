@@ -15,7 +15,7 @@ export function Video({ upload }: { upload: Upload }) {
         aria-hidden="true"
       />
 
-      <div className={"absolute bottom-0 left-0 text-white flex-col p-2"}>
+      <div className={"absolute bottom-0 left-0 text-white flex-col p-2 z-10"}>
         <div>
           <span className={"text-xl font-bold"}>{upload.topTag}</span>{" "}
           <span className={"text-muted"}>+8</span>
