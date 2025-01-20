@@ -5,48 +5,44 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel.tsx";
 import { Video } from "@/components/Video.tsx";
-import { useMedia } from "@/components/UseMedia.ts";
+import { useDoomscroll } from "@/components/UseDoomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
 
 export function HomeFeed() {
-    const { videos } = useMedia();
     const [api, setApi] = useState<CarouselApi>();
     const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const [renderedVideos, setRenderedVideos] = useState(videos.slice(0, 3)); // Initially render 3 videos
+    const { videos, setAsSeen, loadMore } = useDoomscroll(currentSlide);
 
-    //#region Seed renderedVideos arr
-    useEffect(() => {
-        if (renderedVideos.length === 0 && videos.length > 0) {
-            setRenderedVideos(videos.slice(0, 3));
+    /**
+     * A slide animation was fulfilled. Either we jumped to the next or previous video.
+     */
+    const onSettle = useCallback(() => {
+        setAsSeen(currentSlide);
+        loadMore();
+    }, [currentSlide, loadMore, setAsSeen]);
+
+    const onSelect = useCallback(() => {
+        if (!api) {
+            return;
         }
-    }, [renderedVideos.length, videos]);
-    //#endregion
-
-    const appendVideos = useCallback(() => {
-        const nextIndex = currentSlide + 1;
-        const nextBatch = videos.slice(0, nextIndex + 2); // Load the current, next, and one more video
-        setRenderedVideos(nextBatch);
-    }, [currentSlide, videos]);
+        setCurrentSlide(api.selectedScrollSnap());
+    }, [api]);
 
     useEffect(() => {
         if (!api) {
             return;
         }
 
-        const setCurrentSlideIndex = () => {
-            setCurrentSlide(api.selectedScrollSnap() + 1);
-        };
+        onSelect();
 
-        setCurrentSlideIndex();
-
-        api.on("select", setCurrentSlideIndex);
-        api.on("settle", appendVideos);
+        api.on("select", onSelect);
+        api.on("settle", onSettle);
 
         return () => {
-            api.off("settle", appendVideos);
-            api.off("select", setCurrentSlideIndex);
+            api.off("settle", onSettle);
+            api.off("select", onSelect);
         };
-    }, [api, currentSlide, videos, appendVideos]);
+    }, [api, onSelect, onSettle]);
 
     return (
         <Carousel
@@ -58,7 +54,7 @@ export function HomeFeed() {
             setApi={setApi}
         >
             <CarouselContent className={"h-[calc(100vh-4rem)]"}>
-                {renderedVideos.map((video) => (
+                {videos.map((video) => (
                     <CarouselItem key={video.id} className="relative">
                         <Video upload={video} />
                     </CarouselItem>
