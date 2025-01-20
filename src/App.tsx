@@ -21,7 +21,7 @@ const App = () => {
                     <div className="grid h-full max-w-lg grid-cols-3 mx-auto p-2">
                         <NavLink
                             className={({ isActive }) =>
-                                `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`
+                                `flex flex-col items-center ${isActive ? "text-primary" : "text-gray-500"}`
                             }
                             to={"settings"}
                         >
@@ -35,7 +35,7 @@ const App = () => {
                         </NavLink>
                         <NavLink
                             className={({ isActive }) => {
-                                return `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`;
+                                return `flex flex-col items-center ${isActive ? "text-primary" : "text-gray-500"}`;
                             }}
                             to={"home"}
                         >
@@ -49,7 +49,7 @@ const App = () => {
                         </NavLink>
                         <NavLink
                             className={({ isActive }) => {
-                                return `flex flex-col items-center ${isActive ? "text-blue-400" : "text-gray-500"}`;
+                                return `flex flex-col items-center ${isActive ? "text-primary" : "text-gray-500"}`;
                             }}
                             to={"profile"}
                         >

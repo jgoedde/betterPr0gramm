@@ -1,66 +1,31 @@
 import { MessageSquareMore, MinusCircle, PlusCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Upload } from "@/Upload.ts";
-import useSWR from "swr";
-
-type TagResponse = { id: number; confidence: number; tag: string };
-type CommentResponse = never;
-
-type GetInfoResponse = {
-    tags: TagResponse[];
-    comments: CommentResponse[];
-};
-const fetcher = async (url: string) => {
-    console.log("trying to cache " + url);
-
-    return await new Promise<GetInfoResponse>((res) => {
-        setTimeout(
-            () =>
-                res({
-                    tags: [
-                        {
-                            id: Math.floor(Math.random() * 100000),
-                            confidence: 1,
-                            tag: "Test",
-                        },
-                    ],
-                    comments: [],
-                } as GetInfoResponse),
-            Math.random() * 3000
-        );
-    });
-
-    /*
-    const response = await fetch(url, {
-        method: "GET",
-    });
-
-    await new Promise((res) => {
-        setTimeout(res, Math.random() * 3000);
-    });
-
-    return (await response.json()) as GetInfoResponse;
-     */
-};
-
-function useUploadInfo(uploadId: number) {
-    const { data, isLoading } = useSWR(
-        `https://pr0gramm.com/api/items/info?itemId=${uploadId}`,
-        fetcher
-    );
-
-    return {
-        tags: data?.tags ?? [],
-        comments: data?.comments ?? [],
-        isLoading,
-    };
-}
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet.tsx";
+import * as React from "react";
+import { ScrollArea } from "./ui/scroll-area";
+import { CommentThread } from "@/components/CommentThread.tsx";
+import { useUploadInfo } from "@/components/UseUploadInfo.ts";
 
 export function Video({ upload }: { upload: Upload }) {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
 
     return (
-        <>
+        <Sheet>
+            <SheetContent>
+                <SheetHeader>
+                    <SheetTitle>Kommentare</SheetTitle>
+                </SheetHeader>
+                <ScrollArea className={"h-full my-4"}>
+                    <CommentThread comments={comments} parentId={0} />
+                </ScrollArea>
+            </SheetContent>
             <video
                 className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110"
                 src={upload.src}
@@ -119,16 +84,21 @@ export function Video({ upload }: { upload: Upload }) {
                         {upload.benis <= 0 && <span>{upload.benis}</span>}
                     </div>
                 </div>
-                <div className={"flex flex-col items-center justify-center"}>
-                    <MessageSquareMore size={33} />
-                    {isLoading ? (
-                        <div role="status" className="animate-pulse">
-                            <div className="h-2 bg-gray-200 rounded-full w-4"></div>
-                        </div>
-                    ) : (
-                        <span>{comments.length}</span>
-                    )}
-                </div>
+                <SheetTrigger asChild>
+                    <div
+                        className={"flex flex-col items-center justify-center"}
+                    >
+                        <MessageSquareMore size={33} />
+
+                        {isLoading ? (
+                            <div role="status" className="animate-pulse">
+                                <div className="h-2 bg-gray-200 rounded-full w-4"></div>
+                            </div>
+                        ) : (
+                            <span>{comments.length}</span>
+                        )}
+                    </div>
+                </SheetTrigger>
             </div>
 
             {/* Optional Overlay */}
@@ -147,6 +117,6 @@ export function Video({ upload }: { upload: Upload }) {
                     playsInline
                 />
             </div>
-        </>
+        </Sheet>
     );
 }

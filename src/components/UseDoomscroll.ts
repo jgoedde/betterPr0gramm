@@ -51,10 +51,12 @@ export function useDoomscroll(currentIndex: number) {
                 return prevVideos;
             }
 
-            console.info(
-                "Found new uploads! Inserting them at cursor...",
-                uniqueUploads
-            );
+            if (prevVideos.length > 0) {
+                console.info(
+                    "Found new uploads! Inserting them at cursor...",
+                    uniqueUploads
+                );
+            }
 
             const after = prevVideos.slice(currentIndex + 1);
             const before = prevVideos.slice(0, currentIndex + 1);
