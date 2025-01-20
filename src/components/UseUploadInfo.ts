@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWRImmutable from "swr/immutable";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {
@@ -17,6 +17,7 @@ type GetInfoResponse = {
 const fetcher = async (url: string) => {
     console.log("trying to cache " + url);
 
+    /*
     return await new Promise<GetInfoResponse>((res) => {
         setTimeout(
             () =>
@@ -34,7 +35,9 @@ const fetcher = async (url: string) => {
         );
     });
 
-    /*
+
+     */
+
     const response = await fetch(url, {
         method: "GET",
     });
@@ -44,12 +47,10 @@ const fetcher = async (url: string) => {
     });
 
     return (await response.json()) as GetInfoResponse;
-
- */
 };
 
 export function useUploadInfo(uploadId: number) {
-    const { data, isLoading } = useSWR(
+    const { data, isLoading } = useSWRImmutable(
         `https://pr0gramm.com/api/items/info?itemId=${uploadId}`,
         fetcher
     );

@@ -8,13 +8,36 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet.tsx";
-import * as React from "react";
 import { ScrollArea } from "./ui/scroll-area";
 import { CommentThread } from "@/components/CommentThread.tsx";
 import { useUploadInfo } from "@/components/UseUploadInfo.ts";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 
-export function Video({ upload }: { upload: Upload }) {
+type Props = { upload: Upload };
+
+export const Video: FC<Props> = ({ upload }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const blurredVideoRef = useRef<HTMLVideoElement>(null);
+
+    const pause = useCallback(() => {
+        videoRef.current?.pause();
+        blurredVideoRef.current?.pause();
+        setIsPlaying(false);
+    }, []);
+
+    const resume = useCallback(() => {
+        void videoRef.current?.play();
+        void blurredVideoRef.current?.play();
+        setIsPlaying(true);
+    }, []);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            resume();
+        }
+    }, [resume]);
 
     return (
         <Sheet>
@@ -28,13 +51,14 @@ export function Video({ upload }: { upload: Upload }) {
             </SheetContent>
             <video
                 className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110"
-                src={upload.src}
                 autoPlay
                 loop
+                ref={blurredVideoRef}
                 muted
                 playsInline
-                aria-hidden="true"
-            />
+            >
+                <source src={upload.src} />
+            </video>
 
             <div
                 className={
@@ -43,7 +67,7 @@ export function Video({ upload }: { upload: Upload }) {
             >
                 <div>
                     {isLoading ? (
-                        <div role="status" className="max-w-sm animate-pulse">
+                        <div className="max-w-sm animate-pulse">
                             <div className="h-3 bg-gray-200 rounded-full w-48 mb-2"></div>
                             <div className="h-2 bg-gray-200 rounded-full max-w-[360px]"></div>
                         </div>
@@ -91,7 +115,7 @@ export function Video({ upload }: { upload: Upload }) {
                         <MessageSquareMore size={33} />
 
                         {isLoading ? (
-                            <div role="status" className="animate-pulse">
+                            <div className="animate-pulse">
                                 <div className="h-2 bg-gray-200 rounded-full w-4"></div>
                             </div>
                         ) : (
@@ -106,17 +130,24 @@ export function Video({ upload }: { upload: Upload }) {
             {/* Foreground Video */}
             <div className="absolute inset-0 flex items-center justify-center">
                 <video
+                    ref={videoRef}
                     className="w-full h-full max-w-full max-h-full object-contain"
-                    src={upload.src} // Replace with your video source
                     autoPlay
                     loop
                     muted
-                    onClick={() => {
-                        // TODO: Pause video
-                    }}
                     playsInline
-                />
+                    onClick={() => {
+                        console.info("onClick foreground");
+                        if (isPlaying) {
+                            pause();
+                        } else {
+                            resume();
+                        }
+                    }}
+                >
+                    <source src={upload.src} />
+                </video>
             </div>
         </Sheet>
     );
-}
+};
