@@ -12,6 +12,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { CommentThread } from "@/components/CommentThread.tsx";
 import { useUploadInfo } from "@/components/UseUploadInfo.ts";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { BlurredFullscreenVideo } from "@/components/BlurredFullscreenVideo.tsx";
 
 type Props = { upload: Upload };
 
@@ -49,16 +50,8 @@ export const Video: FC<Props> = ({ upload }) => {
                     <CommentThread comments={comments} parentId={0} />
                 </ScrollArea>
             </SheetContent>
-            <video
-                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110"
-                autoPlay
-                loop
-                ref={blurredVideoRef}
-                muted
-                playsInline
-            >
-                <source src={upload.src} />
-            </video>
+
+            <BlurredFullscreenVideo ref={blurredVideoRef} src={upload.src} />
 
             <div
                 className={

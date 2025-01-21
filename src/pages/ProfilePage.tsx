@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { BASE_URL } from "@/components/api.ts";
+import Cookies from "js-cookie";
+import { ProfileOverview } from "@/pages/ProfileOverview.tsx";
 
 type CaptchaResponse = {
     token: string;
@@ -35,14 +37,46 @@ function useCaptcha() {
     return captcha;
 }
 
-export function ProfilePage() {
+async function logout() {
+    await fetch("https://pr0gramm.com/api/user/logout", {
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        referrer: "https://pr0gramm.com/settings/site",
+        body: "id=a22db07456fbbcf65717193f70d546c7&_nonce=a22db07456fbbcf6", // TODO: _nonce?
+        method: "POST",
+    });
+}
+
+function useCookie<T>(name: string) {
+    const [cookieStr] = useState(Cookies.get(name));
+
+    const cookieValJson = useMemo<T | undefined>(() => {
+        if (cookieStr == null) {
+            return undefined;
+        }
+        try {
+            return JSON.parse(cookieStr);
+        } catch (e) {
+            if (e instanceof Error) {
+                console.error("Encountered an error while parsing cookie", e);
+            }
+            return undefined;
+        }
+    }, [cookieStr]);
+
+    return { cookieValJson };
+}
+
+const LoginForm: FC = () => {
     const captcha = useCaptcha();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [captchaStr, setCaptchaStr] = useState("");
 
     if (!captcha) {
-        return null;
+        return <>Loading...</>;
     }
 
     return (
@@ -139,4 +173,18 @@ export function ProfilePage() {
             </div>
         </div>
     );
+};
+
+export function ProfilePage() {
+    const { cookieValJson } = useCookie<{ n: string }>("me");
+
+    const isLoggedIn = useMemo(() => {
+        return cookieValJson?.n != null;
+    }, [cookieValJson?.n]);
+
+    if (!isLoggedIn) {
+        return <LoginForm />;
+    }
+
+    return <ProfileOverview nickname={cookieValJson!.n} />;
 }
