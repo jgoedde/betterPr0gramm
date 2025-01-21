@@ -1,4 +1,5 @@
 import useSWRImmutable from "swr/immutable";
+import { BASE_URL } from "@/components/api.ts";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {
@@ -40,6 +41,7 @@ const fetcher = async (url: string) => {
 
     const response = await fetch(url, {
         method: "GET",
+        credentials: "include",
     });
 
     await new Promise((res) => {
@@ -51,7 +53,7 @@ const fetcher = async (url: string) => {
 
 export function useUploadInfo(uploadId: number) {
     const { data, isLoading } = useSWRImmutable(
-        `https://pr0gramm.com/api/items/info?itemId=${uploadId}`,
+        `${BASE_URL}/api/items/info?itemId=${uploadId}`,
         fetcher
     );
 

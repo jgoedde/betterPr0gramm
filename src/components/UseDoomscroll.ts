@@ -1,6 +1,7 @@
 import { Upload } from "@/Upload.ts";
 import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
+import { BASE_URL } from "@/components/api.ts";
 
 type ItemResponse = {
     id: number;
@@ -17,23 +18,25 @@ type GetPostsResponse = {
 
 const TAKE_VIDEOS = 3;
 
+const fetcher = async (url: string) => {
+    const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+    });
+
+    return (await response.json()) as GetPostsResponse;
+};
+
 export function useDoomscroll(currentIndex: number) {
     const [seen, setSeen] = useState<{ postId: number; timestamp: Date }[]>([]);
     const [videos, setVideos] = useState<Upload[]>([]);
     const [feed, setFeed] = useState<Upload[]>([]);
 
-    const { data } = useSWR("neu", async () => {
-        //        const { data } = useSWR("beliebt", async () => {
-        const response = await fetch(
-            "https://pr0gramm.com/api/items/get?flags=1",
-            // "https://pr0gramm.com/api/items/get?flags=1&promoted=1&show_junk=0",
-            {
-                method: "GET",
-            }
-        );
-
-        return (await response.json()) as GetPostsResponse;
-    });
+    const { data } = useSWR(
+        ["neu", `${BASE_URL}/api/items/get?flags=1`],
+        //        ["neu", `${PR0GRAMM_BASE_URL}/api/items/get?flags=1&promoted=1&show_junk=0`],
+        ([, url]) => fetcher(url)
+    );
 
     useEffect(() => {
         if (!data?.items) {

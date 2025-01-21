@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { BASE_URL } from "@/components/api.ts";
 
 type CaptchaResponse = {
     token: string;
@@ -14,11 +15,12 @@ function useCaptcha() {
 
     const fetchCaptcha = useCallback(async () => {
         const response = await fetch(
-            "https://pr0gramm.com/api/user/captcha?bust=0.5545422719773347",
+            `${BASE_URL}/api/user/captcha?bust=0.5545422719773347`,
             {
                 headers: {
                     accept: "application/json, text/javascript, */*; q=0.01",
                 },
+                credentials: "include",
                 method: "GET",
             }
         );
@@ -35,7 +37,6 @@ function useCaptcha() {
 
 export function ProfilePage() {
     const captcha = useCaptcha();
-    const [json, setJson] = useState<string>("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [captchaStr, setCaptchaStr] = useState("");
@@ -118,19 +119,15 @@ export function ProfilePage() {
                     <div>
                         <button
                             onClick={async () => {
-                                await fetch(
-                                    "https://pr0gramm.com/api/user/login",
-                                    {
-                                        headers: {
-                                            accept: "application/json, text/javascript, */*; q=0.01",
-                                            "accept-language": "de-DE,de;q=0.9",
-                                            "content-type":
-                                                "application/x-www-form-urlencoded; charset=UTF-8",
-                                        },
-                                        body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
-                                        method: "POST",
-                                    }
-                                );
+                                await fetch(`${BASE_URL}/api/user/login`, {
+                                    headers: {
+                                        "content-type":
+                                            "application/x-www-form-urlencoded; charset=UTF-8",
+                                    },
+                                    body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
+                                    method: "POST",
+                                    credentials: "include",
+                                });
                             }}
                             // type="submit"
                             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
@@ -138,27 +135,7 @@ export function ProfilePage() {
                             Sign in
                         </button>
                     </div>
-                    <div>
-                        <button
-                            onClick={async () => {
-                                const response = await fetch(
-                                    "https://pr0gramm.com/api/items/get?flags=9&user=JuiceCS&collection=favoriten&self=true",
-                                    {
-                                        method: "GET",
-                                    }
-                                );
-
-                                const newVar = await response.json();
-                                setJson(JSON.stringify(newVar));
-                            }}
-                            className="flex w-full justify-center rounded-md bg-gray-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
-                        >
-                            Try fetch posts
-                        </button>
-                    </div>
                 </div>
-
-                <pre>{json}</pre>
             </div>
         </div>
     );
