@@ -4,8 +4,8 @@ import {
     CarouselContent,
     CarouselItem,
 } from "@/components/ui/carousel.tsx";
-import { Video } from "@/components/Video.tsx";
-import { useDoomscroll } from "@/components/UseDoomscroll.ts";
+import { Video } from "@/components/feed/player/Video.tsx";
+import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
 
 export function HomeFeed() {

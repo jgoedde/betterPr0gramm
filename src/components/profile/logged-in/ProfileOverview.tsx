@@ -11,7 +11,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs.tsx";
-import { useProfileInfo } from "@/components/UseProfileInfo.ProfileOverview.ts";
+import { useProfileInfo } from "@/components/profile/logged-in/use-profile-info.ts";
 import { Button } from "@/components/ui/button.tsx";
 
 export const ProfileOverview: FC<{ nickname: string }> = ({ nickname }) => {

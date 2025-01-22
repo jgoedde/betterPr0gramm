@@ -1,6 +1,6 @@
-import { Upload } from "@/Upload.ts";
+import { Upload } from "@/components/feed/Upload.ts";
 import { useCallback, useEffect, useState } from "react";
-import { BASE_URL } from "@/components/api.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 import useSWRImmutable from "swr/immutable";
 
 type ItemResponse = {

@@ -1,5 +1,5 @@
 import useSWRImmutable from "swr/immutable";
-import { BASE_URL } from "@/components/api.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {

@@ -1,6 +1,6 @@
 import { MessageSquareMore, MinusCircle, PlusCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Upload } from "@/Upload.ts";
+import { Upload } from "@/components/feed/Upload.ts";
 import {
     Sheet,
     SheetContent,
@@ -8,11 +8,11 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet.tsx";
-import { ScrollArea } from "./ui/scroll-area";
-import { CommentThread } from "@/components/CommentThread.tsx";
-import { useUploadInfo } from "@/components/UseUploadInfo.ts";
+import { ScrollArea } from "../../ui/scroll-area.tsx";
+import { CommentThread } from "@/components/feed/comments/CommentThread.tsx";
+import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
-import { BlurredFullscreenVideo } from "@/components/BlurredFullscreenVideo.tsx";
+import { BlurredFullscreenVideo } from "@/components/feed/player/BlurredFullscreenVideo.tsx";
 
 type Props = { upload: Upload };
 
