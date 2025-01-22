@@ -1,11 +1,11 @@
 import { FC, Ref } from "react";
 
 type Props = {
-    ref: Ref<HTMLVideoElement>;
+    videoRef: Ref<HTMLVideoElement>;
     src: string;
 };
 
-export const BlurredFullscreenVideo: FC<Props> = ({ ref, src }) => (
+export const BlurredFullscreenVideo: FC<Props> = ({ videoRef: ref, src }) => (
     <video
         className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110"
         autoPlay

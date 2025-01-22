@@ -3,13 +3,14 @@ import { ListVideo, SlidersHorizontal, User } from "lucide-react";
 import { HomeFeed } from "@/pages/HomeFeed.tsx";
 import { ProfilePage } from "@/pages/ProfilePage.tsx";
 import { SettingsPage } from "@/pages/SettingsPage.tsx";
+import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
     return (
         <BrowserRouter>
             <div className="flex flex-col h-screen">
                 {/* Main Content */}
-                <div className="h-[calc(100vh-4rem)]">
+                <div className="grow">
                     <Routes>
                         <Route path="/home" element={<HomeFeed />} />
                         <Route path="/settings" element={<SettingsPage />} />
@@ -17,7 +18,7 @@ const App = () => {
                     </Routes>
                 </div>
 
-                <div className="z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+                <div className="z-50 w-full h-16 flex-none bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
                     <div className="grid h-full max-w-lg grid-cols-3 mx-auto p-2">
                         <NavLink
                             className={({ isActive }) =>
@@ -66,6 +67,7 @@ const App = () => {
                     </div>
                 </div>
             </div>
+            <Toaster />
         </BrowserRouter>
     );
 };

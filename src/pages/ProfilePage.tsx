@@ -1,7 +1,13 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { BASE_URL } from "@/components/api.ts";
 import Cookies from "js-cookie";
-import { ProfileOverview } from "@/pages/ProfileOverview.tsx";
+import { ProfileOverview } from "@/components/ProfileOverview.tsx";
+import { useToast } from "@/hooks/use-toast.ts";
+import { ToastAction } from "@/components/ui/toast";
+import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
 
 type CaptchaResponse = {
     token: string;
@@ -37,6 +43,7 @@ function useCaptcha() {
     return captcha;
 }
 
+/*
 async function logout() {
     await fetch("https://pr0gramm.com/api/user/logout", {
         credentials: "include",
@@ -48,6 +55,7 @@ async function logout() {
         method: "POST",
     });
 }
+ */
 
 function useCookie<T>(name: string) {
     const [cookieStr] = useState(Cookies.get(name));
@@ -71,9 +79,50 @@ function useCookie<T>(name: string) {
 
 const LoginForm: FC = () => {
     const captcha = useCaptcha();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [captchaStr, setCaptchaStr] = useState("");
+
+    const login = useCallback(async () => {
+        if (
+            username === "" ||
+            password === "" ||
+            captchaStr === "" ||
+            !captcha
+        ) {
+            return;
+        }
+
+        const response = await fetch(`${BASE_URL}/api/user/login`, {
+            headers: {
+                "content-type":
+                    "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
+            method: "POST",
+            credentials: "include",
+        });
+
+        if (response.ok) {
+            toast({
+                title: "Successfully logged in!",
+                description: `You are now logged in as ${username}. Access your uploads, collections & comments.`,
+                action: (
+                    <ToastAction
+                        onClick={() => {
+                            navigate(0);
+                        }}
+                        altText="Refresh"
+                    >
+                        Show my profile!
+                    </ToastAction>
+                ),
+            });
+        }
+    }, [captcha, captchaStr, navigate, password, toast, username]);
 
     if (!captcha) {
         return <>Loading...</>;
@@ -84,36 +133,25 @@ const LoginForm: FC = () => {
             <div className="mt-10">
                 <div className="space-y-6">
                     <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm/6 font-medium text-gray-900"
-                        >
-                            Username
-                        </label>
+                        <Label htmlFor="username">Username</Label>
                         <div className="mt-2">
-                            <input
+                            <Input
                                 type="text"
                                 name="username"
                                 id="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                             />
                         </div>
                     </div>
 
                     <div>
                         <div className="flex items-center justify-between">
-                            <label
-                                htmlFor="password"
-                                className="block text-sm/6 font-medium text-gray-900"
-                            >
-                                Password
-                            </label>
+                            <Label htmlFor="password">Password</Label>
                         </div>
                         <div className="mt-2">
-                            <input
+                            <Input
                                 type="password"
                                 name="password"
                                 id="password"
@@ -121,7 +159,6 @@ const LoginForm: FC = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 autoComplete="current-password"
                                 required
-                                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                             />
                         </div>
                     </div>
@@ -131,43 +168,29 @@ const LoginForm: FC = () => {
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="captcha"
-                            className="block text-sm/6 font-medium text-gray-900"
-                        >
-                            Captcha
-                        </label>
+                        <Label htmlFor="captcha">Captcha</Label>
+
                         <div className="mt-2">
-                            <input
+                            <Input
                                 type="text"
                                 value={captchaStr}
                                 onChange={(e) => setCaptchaStr(e.target.value)}
                                 name="captcha"
                                 id="captcha"
                                 required
-                                className="block w-1/4 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                                className="w-1/4"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <button
-                            onClick={async () => {
-                                await fetch(`${BASE_URL}/api/user/login`, {
-                                    headers: {
-                                        "content-type":
-                                            "application/x-www-form-urlencoded; charset=UTF-8",
-                                    },
-                                    body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
-                                    method: "POST",
-                                    credentials: "include",
-                                });
-                            }}
+                        <Button
+                            onClick={login}
                             // type="submit"
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="flex w-full justify-center"
                         >
                             Sign in
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

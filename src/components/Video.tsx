@@ -51,7 +51,10 @@ export const Video: FC<Props> = ({ upload }) => {
                 </ScrollArea>
             </SheetContent>
 
-            <BlurredFullscreenVideo ref={blurredVideoRef} src={upload.src} />
+            <BlurredFullscreenVideo
+                videoRef={blurredVideoRef}
+                src={upload.src}
+            />
 
             <div
                 className={

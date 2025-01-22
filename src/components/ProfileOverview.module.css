@@ -1,0 +1,23 @@
+.stat {
+    @apply flex flex-col items-center;
+
+    .number {
+        @apply font-bold;
+    }
+}
+
+.videoGrid {
+    @apply grid grid-cols-3 gap-1;
+
+    .gridItem {
+        @apply w-32 h-32;
+    }
+
+    .gridItemSkeleton {
+        @apply w-32 h-32;
+    }
+}
+
+.tabContent {
+    @apply h-0 overflow-y-scroll grow
+}
