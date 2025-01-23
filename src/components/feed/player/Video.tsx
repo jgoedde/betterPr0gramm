@@ -1,5 +1,4 @@
 import { MessageSquareMore, MinusCircle, PlusCircle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { Upload } from "@/components/feed/Upload.ts";
 import {
     Sheet,
@@ -8,17 +7,18 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet.tsx";
-import { ScrollArea } from "../../ui/scroll-area.tsx";
 import { CommentThread } from "@/components/feed/comments/CommentThread.tsx";
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
-import { BlurredFullscreenVideo } from "@/components/feed/player/BlurredFullscreenVideo.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { cn } from "@/lib/utils.ts";
 
 type Props = { upload: Upload };
 
 export const Video: FC<Props> = ({ upload }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
     const [isPlaying, setIsPlaying] = useState(true);
+    const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const blurredVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -46,50 +46,64 @@ export const Video: FC<Props> = ({ upload }) => {
                 <SheetHeader>
                     <SheetTitle>Kommentare</SheetTitle>
                 </SheetHeader>
-                <ScrollArea className={"h-full my-4"}>
-                    <CommentThread comments={comments} parentId={0} />
-                </ScrollArea>
+                <div className={"h-full overflow-y-scroll"}>
+                    <CommentThread comments={comments} />
+                </div>
             </SheetContent>
 
-            <BlurredFullscreenVideo
-                videoRef={blurredVideoRef}
-                src={upload.src}
-            />
+            {/*<BlurredFullscreenVideo*/}
+            {/*    videoRef={blurredVideoRef}*/}
+            {/*    src={upload.src}*/}
+            {/*/>*/}
 
-            <div
-                className={
-                    "absolute bottom-0 left-0 text-white flex-col p-2 z-10"
-                }
-            >
-                <div>
-                    {isLoading ? (
-                        <div className="max-w-sm animate-pulse">
-                            <div className="h-3 bg-gray-200 rounded-full w-48 mb-2"></div>
-                            <div className="h-2 bg-gray-200 rounded-full max-w-[360px]"></div>
-                        </div>
-                    ) : (
-                        <>
-                            <span className={"text-xl font-bold"}>
+            <div className={"absolute bottom-0 left-0 flex-col p-2 z-10 w-5/6"}>
+                <div
+                    onClick={() => {
+                        setShouldShowAllTags((prev) => !prev);
+                    }}
+                >
+                    <div>
+                        {isLoading ? (
+                            <>
+                                <Skeleton className="h-4 w-48 mb-2" />
+                                <Skeleton className="h-3 max-w-[360px]" />
+                            </>
+                        ) : (
+                            <div className="font-bold text-lg">
                                 {tags[0].tag}
-                            </span>{" "}
-                            <span className={"text-muted"}>
-                                +{tags.length - 1}
-                            </span>
-                        </>
-                    )}
+                            </div>
+                        )}
+                    </div>
+                    <div
+                        className={cn(
+                            "transition-all ease-in-out duration-800 overflow-hidden",
+                            shouldShowAllTags ? "max-h-[200px]" : "max-h-6"
+                        )}
+                    >
+                        {tags
+                            .filter((_, i) => i !== 0)
+                            .map((t) => t.tag)
+                            .join(", ")}
+                    </div>
                 </div>
 
-                <div>
-                    <span>{upload.uploaderName}, </span>
-                    <span className={"text-muted"}>
-                        {formatDistanceToNow(upload.uploadedAt, {
-                            addSuffix: true,
-                        })}
-                    </span>
-                </div>
+                {/*AUTHOR. VIELLEICHT BRAUCHT DAS GAR NICHT...*/}
+                {/*<div className={"mt-2"}>*/}
+                {/*    <span>*/}
+                {/*        <span className={"font-bold"}>*/}
+                {/*            {upload.uploaderName}*/}
+                {/*        </span>*/}
+                {/*        ,{" "}*/}
+                {/*    </span>*/}
+                {/*    <span className={""}>*/}
+                {/*        {formatDistanceToNow(upload.uploadedAt, {*/}
+                {/*            addSuffix: true,*/}
+                {/*        })}*/}
+                {/*    </span>*/}
+                {/*</div>*/}
             </div>
 
-            <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 text-white p-2">
+            <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2">
                 <div className={"my-4"}>
                     <div
                         className={"flex flex-col items-center justify-center"}
@@ -111,9 +125,7 @@ export const Video: FC<Props> = ({ upload }) => {
                         <MessageSquareMore size={33} />
 
                         {isLoading ? (
-                            <div className="animate-pulse">
-                                <div className="h-2 bg-gray-200 rounded-full w-4"></div>
-                            </div>
+                            <Skeleton className={"h-2 w-4"} />
                         ) : (
                             <span>{comments.length}</span>
                         )}
@@ -121,9 +133,6 @@ export const Video: FC<Props> = ({ upload }) => {
                 </SheetTrigger>
             </div>
 
-            {/* Optional Overlay */}
-            {/*<div className="absolute inset-0 bg-black bg-opacity-50"></div>*/}
-            {/* Foreground Video */}
             <div className="absolute inset-0 flex items-center justify-center">
                 <video
                     ref={videoRef}
