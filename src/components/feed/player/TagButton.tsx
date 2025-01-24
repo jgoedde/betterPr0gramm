@@ -6,7 +6,7 @@ type Props = {
     id: number;
 };
 
-export const TagButton: FC<Props> = ({ tag, id }) => {
+export const TagButton: FC<Props> = ({ tag }) => {
     const handlers = useLongPress({
         delay: 300,
         onLongPress: () => {
