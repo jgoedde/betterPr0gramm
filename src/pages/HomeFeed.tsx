@@ -83,7 +83,10 @@ export function HomeFeed() {
                     <CarouselContent className={"h-[calc(100vh-4rem)]"}>
                         {videos.map((video) => (
                             <CarouselItem key={video.id} className="relative">
-                                <Video upload={video} />
+                                <Video
+                                    upload={video}
+                                    currentVideoId={videos[currentSlide].id}
+                                />
                             </CarouselItem>
                         ))}
                     </CarouselContent>

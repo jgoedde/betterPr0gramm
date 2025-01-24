@@ -1,23 +1,15 @@
-import { MessageSquareMore, MinusCircle, PlusCircle } from "lucide-react";
 import { Upload } from "@/components/feed/Upload.ts";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet.tsx";
-import { CommentThread } from "@/components/feed/comments/CommentThread.tsx";
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { cn } from "@/lib/utils.ts";
+import { Tag } from "@/components/feed/player/Tag.tsx";
+import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
+import { SideBar } from "@/components/feed/player/SideBar.tsx";
 
-type Props = { upload: Upload };
+type Props = { upload: Upload; currentVideoId: number };
 
-const DEFAULT_TAGS_SHOWN_COUNT = 2;
+export const DEFAULT_TAGS_SHOWN_COUNT = 2;
 
-export const Video: FC<Props> = ({ upload }) => {
+export const Video: FC<Props> = ({ upload, currentVideoId }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
     const [isPlaying, setIsPlaying] = useState(true);
     const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
@@ -30,23 +22,13 @@ export const Video: FC<Props> = ({ upload }) => {
         setIsPlaying(false);
     }, []);
 
-    const resume = useCallback(() => {
-        void videoRef.current?.play();
-        void blurredVideoRef.current?.play();
+    const resume = useCallback(async () => {
+        await videoRef.current?.play();
+        await blurredVideoRef.current?.play();
         setIsPlaying(true);
     }, []);
 
-    useEffect(() => {
-        if (videoRef.current) {
-            resume();
-        }
-    }, [resume]);
-
     const [truncate, setTruncate] = useState<"truncate" | "">("");
-
-    const formatTags = useCallback((list: string[]) => {
-        return list.join(" • ");
-    }, []);
 
     const topTag = useMemo(() => {
         const tag = tags[0]?.tag;
@@ -56,15 +38,34 @@ export const Video: FC<Props> = ({ upload }) => {
         return tag;
     }, [tags]);
 
-    const otherTags = useMemo(() => {
+    const toTag = useCallback(
+        (res: (typeof tags)[0]): Tag => ({ name: res.tag, id: res.id }),
+        []
+    );
+
+    const otherTags = useMemo<Tag[]>(() => {
         if (shouldShowAllTags) {
-            return tags.filter((t) => t.tag !== topTag);
+            return tags.filter((t) => t.tag !== topTag).map(toTag);
         }
 
         return tags
             .filter((t) => t.tag !== topTag)
-            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT);
-    }, [shouldShowAllTags, tags, topTag]);
+            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT)
+            .map(toTag);
+    }, [shouldShowAllTags, tags, toTag, topTag]);
+
+    // This hook is responsible for pausing the video that we just swiped away and play the new one.
+    useEffect(() => {
+        if (currentVideoId === upload.id) {
+            // Autoplay after 200ms
+            setTimeout(() => {
+                void resume();
+            }, 200);
+        } else {
+            // Pause the other video after swipe
+            pause();
+        }
+    }, [currentVideoId, pause, resume, upload.id]);
 
     // Gross...
     useEffect(() => {
@@ -78,97 +79,22 @@ export const Video: FC<Props> = ({ upload }) => {
     }, [shouldShowAllTags]);
 
     return (
-        <Sheet>
-            <SheetContent>
-                <SheetHeader>
-                    <SheetTitle>Kommentare</SheetTitle>
-                </SheetHeader>
-                <div className={"h-full overflow-y-scroll"}>
-                    <CommentThread comments={comments} />
-                </div>
-            </SheetContent>
+        <>
+            <BottomBar
+                shouldShowAllTags={shouldShowAllTags}
+                setShouldShowAllTags={setShouldShowAllTags}
+                loading={isLoading}
+                topTag={topTag}
+                inputs={truncate}
+                tags={otherTags}
+            />
 
-            <div
-                className={"absolute bottom-0 left-0 w-full p-2 z-10"}
-                style={{
-                    ...(shouldShowAllTags && {
-                        boxShadow: "rgba(0, 0, 0, 0.5) 0px 0px 20px 20px",
-                        background: "rgba(0,0,0,0.5)",
-                    }),
-                }}
-            >
-                <div
-                    className={cn(
-                        "flex-col w-5/6 text-white",
-                        shouldShowAllTags && ""
-                    )}
-                >
-                    <div>
-                        {isLoading ? (
-                            <>
-                                <Skeleton className="h-4 w-48 mb-2" />
-                                <Skeleton className="h-3 max-w-[360px]" />
-                            </>
-                        ) : (
-                            <div className="font-bold text-lg">{topTag}</div>
-                        )}
-                    </div>
-                    <div
-                        className={cn(
-                            "transition-all ease-in-out duration-1000",
-                            truncate,
-                            shouldShowAllTags
-                                ? "max-h-[200px] overflow-y-scroll"
-                                : "max-h-6"
-                        )}
-                    >
-                        {formatTags(otherTags.map((t) => t.tag))}
-                    </div>
-                    <div className="flex w-full justify-end">
-                        {!isLoading &&
-                            otherTags.length > DEFAULT_TAGS_SHOWN_COUNT && (
-                                <span
-                                    className={"text-muted"}
-                                    onClick={() =>
-                                        setShouldShowAllTags((prev) => !prev)
-                                    }
-                                >
-                                    {shouldShowAllTags ? "Weniger" : "Mehr"}
-                                </span>
-                            )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">
-                <div className={"my-4"}>
-                    <div
-                        className={"flex flex-col items-center justify-center"}
-                    >
-                        <PlusCircle size={33} />
-                        {upload.benis >= 1 && <span>{upload.benis}</span>}
-                    </div>
-                    <div
-                        className={"flex flex-col items-center justify-center"}
-                    >
-                        <MinusCircle size={33} />
-                        {upload.benis <= 0 && <span>{upload.benis}</span>}
-                    </div>
-                </div>
-                <SheetTrigger asChild>
-                    <div
-                        className={"flex flex-col items-center justify-center"}
-                    >
-                        <MessageSquareMore size={33} />
-
-                        {isLoading ? (
-                            <Skeleton className={"h-2 w-4"} />
-                        ) : (
-                            <span>{comments.length}</span>
-                        )}
-                    </div>
-                </SheetTrigger>
-            </div>
+            <SideBar
+                uploadId={upload.id}
+                benis={upload.benis}
+                loading={isLoading}
+                commentResponses={comments as never[]}
+            />
 
             <div className="absolute inset-0 flex items-center justify-center">
                 <video
@@ -176,10 +102,8 @@ export const Video: FC<Props> = ({ upload }) => {
                     className="w-full h-full max-w-full max-h-full object-contain"
                     autoPlay
                     loop
-                    muted
                     playsInline
                     onClick={() => {
-                        console.info("onClick foreground");
                         if (isPlaying) {
                             pause();
                         } else {
@@ -190,6 +114,6 @@ export const Video: FC<Props> = ({ upload }) => {
                     <source src={upload.src} />
                 </video>
             </div>
-        </Sheet>
+        </>
     );
 };
