@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/sheet.tsx";
 import { CommentThread } from "@/components/feed/comments/CommentThread.tsx";
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { cn } from "@/lib/utils.ts";
 
 type Props = { upload: Upload };
+
+const DEFAULT_TAGS_SHOWN_COUNT = 2;
 
 export const Video: FC<Props> = ({ upload }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
@@ -40,6 +42,41 @@ export const Video: FC<Props> = ({ upload }) => {
         }
     }, [resume]);
 
+    const [truncate, setTruncate] = useState<"truncate" | "">("");
+
+    const formatTags = useCallback((list: string[]) => {
+        return list.join(" • ");
+    }, []);
+
+    const topTag = useMemo(() => {
+        const tag = tags[0]?.tag;
+        if (tag == null) {
+            return undefined;
+        }
+        return tag;
+    }, [tags]);
+
+    const otherTags = useMemo(() => {
+        if (shouldShowAllTags) {
+            return tags.filter((t) => t.tag !== topTag);
+        }
+
+        return tags
+            .filter((t) => t.tag !== topTag)
+            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT);
+    }, [shouldShowAllTags, tags, topTag]);
+
+    // Gross...
+    useEffect(() => {
+        if (!shouldShowAllTags) {
+            setTimeout(() => {
+                setTruncate("truncate");
+            }, 1000);
+        } else {
+            setTruncate("");
+        }
+    }, [shouldShowAllTags]);
+
     return (
         <Sheet>
             <SheetContent>
@@ -51,16 +88,20 @@ export const Video: FC<Props> = ({ upload }) => {
                 </div>
             </SheetContent>
 
-            {/*<BlurredFullscreenVideo*/}
-            {/*    videoRef={blurredVideoRef}*/}
-            {/*    src={upload.src}*/}
-            {/*/>*/}
-
-            <div className={"absolute bottom-0 left-0 flex-col p-2 z-10 w-5/6"}>
+            <div
+                className={"absolute bottom-0 left-0 w-full p-2 z-10"}
+                style={{
+                    ...(shouldShowAllTags && {
+                        boxShadow: "rgba(0, 0, 0, 0.5) 0px 0px 20px 20px",
+                        background: "rgba(0,0,0,0.5)",
+                    }),
+                }}
+            >
                 <div
-                    onClick={() => {
-                        setShouldShowAllTags((prev) => !prev);
-                    }}
+                    className={cn(
+                        "flex-col w-5/6 text-white",
+                        shouldShowAllTags && ""
+                    )}
                 >
                     <div>
                         {isLoading ? (
@@ -69,41 +110,37 @@ export const Video: FC<Props> = ({ upload }) => {
                                 <Skeleton className="h-3 max-w-[360px]" />
                             </>
                         ) : (
-                            <div className="font-bold text-lg">
-                                {tags[0].tag}
-                            </div>
+                            <div className="font-bold text-lg">{topTag}</div>
                         )}
                     </div>
                     <div
                         className={cn(
-                            "transition-all ease-in-out duration-800 overflow-hidden",
-                            shouldShowAllTags ? "max-h-[200px]" : "max-h-6"
+                            "transition-all ease-in-out duration-1000",
+                            truncate,
+                            shouldShowAllTags
+                                ? "max-h-[200px] overflow-y-scroll"
+                                : "max-h-6"
                         )}
                     >
-                        {tags
-                            .filter((_, i) => i !== 0)
-                            .map((t) => t.tag)
-                            .join(", ")}
+                        {formatTags(otherTags.map((t) => t.tag))}
+                    </div>
+                    <div className="flex w-full justify-end">
+                        {!isLoading &&
+                            otherTags.length > DEFAULT_TAGS_SHOWN_COUNT && (
+                                <span
+                                    className={"text-muted"}
+                                    onClick={() =>
+                                        setShouldShowAllTags((prev) => !prev)
+                                    }
+                                >
+                                    {shouldShowAllTags ? "Weniger" : "Mehr"}
+                                </span>
+                            )}
                     </div>
                 </div>
-
-                {/*AUTHOR. VIELLEICHT BRAUCHT DAS GAR NICHT...*/}
-                {/*<div className={"mt-2"}>*/}
-                {/*    <span>*/}
-                {/*        <span className={"font-bold"}>*/}
-                {/*            {upload.uploaderName}*/}
-                {/*        </span>*/}
-                {/*        ,{" "}*/}
-                {/*    </span>*/}
-                {/*    <span className={""}>*/}
-                {/*        {formatDistanceToNow(upload.uploadedAt, {*/}
-                {/*            addSuffix: true,*/}
-                {/*        })}*/}
-                {/*    </span>*/}
-                {/*</div>*/}
             </div>
 
-            <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2">
+            <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">
                 <div className={"my-4"}>
                     <div
                         className={"flex flex-col items-center justify-center"}
