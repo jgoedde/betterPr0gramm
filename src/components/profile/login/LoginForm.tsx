@@ -1,17 +1,17 @@
 import { FC, useCallback, useState } from "react";
 import { useToast } from "@/hooks/use-toast.ts";
-import { useNavigate } from "react-router";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { ToastAction } from "@/components/ui/toast.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { useCaptcha } from "./use-captcha.ts";
+import { useNavigation } from "@/hooks/use-navigation.tsx";
 
 export const LoginForm: FC = () => {
     const captcha = useCaptcha();
     const { toast } = useToast();
-    const navigate = useNavigate();
+    const { goTo } = useNavigation();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -44,7 +44,7 @@ export const LoginForm: FC = () => {
                 action: (
                     <ToastAction
                         onClick={() => {
-                            navigate("/profile");
+                            goTo("profile");
                         }}
                         altText="Refresh"
                     >
@@ -53,7 +53,7 @@ export const LoginForm: FC = () => {
                 ),
             });
         }
-    }, [captcha, captchaStr, navigate, password, toast, username]);
+    }, [captcha, captchaStr, goTo, password, toast, username]);
 
     if (!captcha) {
         return <>Loading...</>;
@@ -95,7 +95,7 @@ export const LoginForm: FC = () => {
                     </div>
 
                     <div>
-                        <img src={`${captcha.captcha}`} />
+                        <img src={`${captcha.captcha}`} alt={"Captcha"} />
                     </div>
 
                     <div>
@@ -103,6 +103,7 @@ export const LoginForm: FC = () => {
 
                         <div className="mt-2">
                             <Input
+                                autoCapitalize={"on"}
                                 type="text"
                                 value={captchaStr}
                                 onChange={(e) => setCaptchaStr(e.target.value)}

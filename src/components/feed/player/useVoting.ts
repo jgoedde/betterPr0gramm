@@ -1,16 +1,16 @@
-import { useLocalStorage } from "@mantine/hooks";
 import { useCallback } from "react";
+import { useLocalStorage } from "react-use";
 
 type Voting = Record<number, "up" | "down" | "none">;
 
 export function useVoting() {
-    const [voting, setVoting] = useLocalStorage<Voting>({
-        key: "pr0gramm-votes",
-        defaultValue: {},
-    });
+    const [voting, setVoting] = useLocalStorage<Voting>("pr0gramm-votes", {});
 
     const isUp = useCallback(
         (uploadId: number) => {
+            if (!voting) {
+                throw new Error("Error reading voting data");
+            }
             return voting[uploadId] === "up";
         },
         [voting]
@@ -18,6 +18,9 @@ export function useVoting() {
 
     const isDown = useCallback(
         (uploadId: number) => {
+            if (!voting) {
+                throw new Error("Error reading voting data");
+            }
             return voting[uploadId] === "down";
         },
         [voting]

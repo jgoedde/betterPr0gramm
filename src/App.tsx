@@ -1,48 +1,26 @@
-import { BrowserRouter, Route, Routes } from "react-router";
-import { HomeFeed } from "@/pages/HomeFeed.tsx";
-import { ProfilePage } from "@/pages/ProfilePage.tsx";
-import { SettingsPage } from "@/pages/SettingsPage.tsx";
 import { Toaster } from "./components/ui/toaster";
 import { useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider.tsx";
 import { BottomNavigation } from "@/components/BottomNavigation.tsx";
+import { ContentWrapper } from "@/components/ContentWrapper.tsx";
+
+import { NavigationProvider } from "@/contexts/navigation/NavigationProvider.tsx";
 
 const App = () => {
     const { setTheme } = useTheme();
 
     useEffect(() => {
-        const theme = Math.random() > 0.5 ? "dark" : "light";
-        console.info("using theme", theme);
-        setTheme(theme);
+        setTheme("dark");
     }, [setTheme]);
 
     return (
-        <BrowserRouter>
+        <NavigationProvider>
             <div className="flex flex-col h-screen max-w-md mx-auto shadow-2xl shadow-foreground bg-background text-foreground">
-                {/* Main Content */}
-                <div className="grow">
-                    <Routes>
-                        <Route
-                            path="/home"
-                            element={
-                                <div
-                                    className={
-                                        "bg-home-background text-home-color"
-                                    }
-                                >
-                                    <HomeFeed />
-                                </div>
-                            }
-                        />
-                        <Route path="/search" element={<SettingsPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                    </Routes>
-                </div>
-
+                <ContentWrapper />
                 <BottomNavigation />
             </div>
             <Toaster />
-        </BrowserRouter>
+        </NavigationProvider>
     );
 };
 
