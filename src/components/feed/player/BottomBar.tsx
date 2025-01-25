@@ -68,7 +68,7 @@ export const BottomBar: FC<Props> = ({
                 <div className="flex w-full justify-end">
                     {!loading && tags.length > DEFAULT_TAGS_SHOWN_COUNT && (
                         <span
-                            className={"text-muted"}
+                            className={"text-white text-opacity-75"}
                             onClick={() =>
                                 setShouldShowAllTags((prev) => !prev)
                             }
