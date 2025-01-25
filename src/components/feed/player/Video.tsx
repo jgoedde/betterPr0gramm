@@ -4,6 +4,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Tag } from "@/components/feed/player/Tag.tsx";
 import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
 import { SideBar } from "@/components/feed/player/SideBar.tsx";
+import { useVideoControls } from "@/components/feed/player/use-video-controls.ts";
 
 type Props = { upload: Upload; currentVideoId: number };
 
@@ -11,40 +12,10 @@ export const DEFAULT_TAGS_SHOWN_COUNT = 2;
 
 export const Video: FC<Props> = ({ upload, currentVideoId }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
-    const [isPlaying, setIsPlaying] = useState(true);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
     const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
-
-    const mute = useCallback(() => {
-        if (videoRef.current) {
-            videoRef.current.muted = true;
-            setIsMuted(true);
-        }
-    }, []);
-
-    const unMute = useCallback(() => {
-        if (videoRef.current) {
-            videoRef.current.muted = false;
-            setIsMuted(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (videoRef.current) {
-            setIsMuted(videoRef.current.muted);
-        }
-    }, [videoRef]);
-
-    const pause = useCallback(() => {
-        videoRef.current?.pause();
-        setIsPlaying(false);
-    }, []);
-
-    const resume = useCallback(async () => {
-        await videoRef.current?.play();
-        setIsPlaying(true);
-    }, []);
+    const { resume, mute, unMute, isMuted, pause, isPlaying } =
+        useVideoControls(videoRef);
 
     const [truncate, setTruncate] = useState<"truncate" | "">("");
 

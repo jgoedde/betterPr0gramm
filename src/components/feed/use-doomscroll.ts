@@ -63,9 +63,11 @@ export function useDoomscroll(currentIndex: number) {
             }
 
             if (prevVideos.length > 0) {
-                console.info(
-                    "Found new uploads! Inserting them at cursor...",
-                    uniqueUploads
+                console.info("Found new uploads! Inserting them at cursor...");
+                console.info(uniqueUploads);
+                console.log(
+                    "existing videos before inserting new ones",
+                    prevVideos
                 );
             }
 
