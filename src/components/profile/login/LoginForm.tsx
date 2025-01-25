@@ -44,7 +44,7 @@ export const LoginForm: FC = () => {
                 action: (
                     <ToastAction
                         onClick={() => {
-                            navigate(0);
+                            navigate("/profile");
                         }}
                         altText="Refresh"
                     >
