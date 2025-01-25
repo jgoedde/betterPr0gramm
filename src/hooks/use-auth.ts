@@ -13,8 +13,12 @@ export function useAuth() {
     return { cookies, updateCookies, deleteCookies };
 }
 
-export function buildCookiesHeader(cookies: Cookies) {
+export function buildCookiesHeader(cookies?: Cookies) {
+    if (cookies == null) {
+        return undefined;
+    }
+
     return {
-        "X-Cookie": `pp=${encodeURIComponent(cookies["pp"])}; me=${encodeURIComponent(JSON.stringify(cookies["me"]))}`,
+        "X-Cookies": `pp=${encodeURIComponent(cookies["pp"])}; me=${encodeURIComponent(JSON.stringify(cookies["me"]))}`,
     };
 }

@@ -19,10 +19,10 @@ type GetPostsResponse = {
 
 const TAKE_VIDEOS = 3;
 
-const fetcher: Fetcher<GetPostsResponse, [string, Cookies]> = async ([
-    url,
-    cookies,
-]) => {
+const fetcher: Fetcher<
+    GetPostsResponse,
+    [string, Cookies | undefined]
+> = async ([url, cookies]) => {
     const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -43,7 +43,7 @@ export function useDoomscroll(currentIndex: number) {
     /* only while developing */
     const { data } = useSWR(
         ["neu", `${BASE_URL}/api/items/get?flags=1`, cookies],
-        ([, url]) => fetcher([url, cookies!])
+        ([, url]) => fetcher([url, cookies])
     );
 
     useEffect(() => {

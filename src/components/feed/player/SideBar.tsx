@@ -24,7 +24,10 @@ export const SideBar: FC<Props> = ({
     const { cookies } = useAuth();
 
     const nonce = useMemo(() => {
-        return cookies!.me.id.slice(0, 16);
+        if (cookies == null) {
+            return undefined;
+        }
+        return cookies.me.id.slice(0, 16);
     }, [cookies]);
 
     const postVote = useCallback(
@@ -33,7 +36,7 @@ export const SideBar: FC<Props> = ({
                 method: "POST",
                 headers: {
                     "content-type": "application/json",
-                    ...buildCookiesHeader(cookies!),
+                    ...buildCookiesHeader(cookies),
                 },
                 body: JSON.stringify({
                     id: uploadId,
@@ -59,8 +62,10 @@ export const SideBar: FC<Props> = ({
             vote = 1;
         }
 
-        postVote(vote);
-    }, [isUp, postVote, revokeVote, uploadId, upvote]);
+        if (cookies) {
+            postVote(vote);
+        }
+    }, [cookies, isUp, postVote, revokeVote, uploadId, upvote]);
 
     const onDownvoteClick = useCallback(() => {
         let vote: 0 | -1;
@@ -75,8 +80,10 @@ export const SideBar: FC<Props> = ({
             vote = -1;
         }
 
-        postVote(vote);
-    }, [downvote, isDown, postVote, revokeVote, uploadId]);
+        if (cookies) {
+            postVote(vote);
+        }
+    }, [cookies, downvote, isDown, postVote, revokeVote, uploadId]);
 
     return (
         <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">

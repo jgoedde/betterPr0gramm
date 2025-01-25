@@ -9,7 +9,6 @@ const fetcher: Fetcher<GetProfileResponse, [string, Cookies]> = async ([
 ]) => {
     const response = await fetch(url, {
         method: "GET",
-        credentials: "include",
         headers: { ...buildCookiesHeader(cookies) },
     });
 

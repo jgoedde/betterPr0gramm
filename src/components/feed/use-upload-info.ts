@@ -17,10 +17,10 @@ type GetInfoResponse = {
     tags: TagResponse[];
     comments: CommentResponse[];
 };
-const fetcher: Fetcher<GetInfoResponse, [string, Cookies]> = async ([
-    url,
-    cookies,
-]) => {
+const fetcher: Fetcher<
+    GetInfoResponse,
+    [string, Cookies | undefined]
+> = async ([url, cookies]) => {
     console.log("trying to cache " + url);
 
     /*
