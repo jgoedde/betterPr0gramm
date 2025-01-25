@@ -15,7 +15,7 @@ const App = () => {
 
     return (
         <NavigationProvider>
-            <div className="flex flex-col h-screen max-w-md mx-auto shadow-2xl shadow-foreground bg-background text-foreground">
+            <div className="flex flex-col h-dvh max-w-md mx-auto shadow-2xl shadow-foreground bg-background text-foreground">
                 <ContentWrapper />
                 <BottomNavigation />
             </div>

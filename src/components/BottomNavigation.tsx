@@ -8,7 +8,7 @@ export function BottomNavigation() {
     return (
         <div
             className={cn(
-                "z-50 w-full h-16 basis-1/12",
+                "z-50 w-full h-full basis-1/12",
                 view === "home"
                     ? "bg-home-background text-home-color"
                     : "bg-background text-foreground"
@@ -17,7 +17,7 @@ export function BottomNavigation() {
             <div className="grid justify-center h-full max-w-lg grid-cols-2 mx-auto p-2 text-foreground">
                 <div
                     className={cn(
-                        `flex w-3/4 mx-auto flex-col items-center`,
+                        `flex w-3/4 mx-auto justify-center h-full`,
                         view === "home" &&
                             "rounded-2xl bg-foreground bg-opacity-25 text-background"
                     )}
@@ -33,7 +33,7 @@ export function BottomNavigation() {
                 </div>
                 <div
                     className={cn(
-                        `flex w-3/4 mx-auto flex-col items-center`,
+                        `flex w-3/4 mx-auto justify-center h-full`,
                         view === "profile" &&
                             "rounded-2xl bg-foreground bg-opacity-25 text-background",
                         view === "home" && "text-white"
