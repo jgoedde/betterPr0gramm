@@ -1,7 +1,7 @@
 import { Upload } from "@/components/feed/Upload.ts";
 import { useCallback, useEffect, useState } from "react";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
-import useSWRImmutable from "swr/immutable";
+import useSWR from 'swr';
 
 type ItemResponse = {
     id: number;
@@ -33,17 +33,10 @@ export function useDoomscroll(currentIndex: number) {
     const [feed, setFeed] = useState<Upload[]>([]);
 
     /* only while developing */
-    const { data } = useSWRImmutable(
+    const { data } = useSWR(
         ["neu", `${BASE_URL}/api/items/get?flags=1`],
         ([, url]) => fetcher(url)
     );
-
-    /*
-         const { data } = useSWR(
-        ["neu", `${BASE_URL}/api/items/get?flags=1`],
-        ([, url]) => fetcher(url)
-    );
-     */
 
     useEffect(() => {
         if (!data?.items) {
