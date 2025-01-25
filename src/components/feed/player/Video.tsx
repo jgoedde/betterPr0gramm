@@ -12,19 +12,37 @@ export const DEFAULT_TAGS_SHOWN_COUNT = 2;
 export const Video: FC<Props> = ({ upload, currentVideoId }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
     const [isPlaying, setIsPlaying] = useState(true);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
     const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const blurredVideoRef = useRef<HTMLVideoElement>(null);
+
+    const mute = useCallback(() => {
+        if (videoRef.current) {
+            videoRef.current.muted = true;
+            setIsMuted(true);
+        }
+    }, []);
+
+    const unMute = useCallback(() => {
+        if (videoRef.current) {
+            videoRef.current.muted = false;
+            setIsMuted(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            setIsMuted(videoRef.current.muted);
+        }
+    }, [videoRef]);
 
     const pause = useCallback(() => {
         videoRef.current?.pause();
-        blurredVideoRef.current?.pause();
         setIsPlaying(false);
     }, []);
 
     const resume = useCallback(async () => {
         await videoRef.current?.play();
-        await blurredVideoRef.current?.play();
         setIsPlaying(true);
     }, []);
 
@@ -94,6 +112,9 @@ export const Video: FC<Props> = ({ upload, currentVideoId }) => {
                 benis={upload.benis}
                 loading={isLoading}
                 commentResponses={comments as never[]}
+                isMuted={isMuted}
+                mute={mute}
+                unMute={unMute}
             />
 
             <div className="absolute inset-0 flex items-center justify-center">

@@ -1,4 +1,10 @@
-import { MessageSquareMore, MinusCircle, PlusCircle } from "lucide-react";
+import {
+    MessageSquareMore,
+    MinusCircle,
+    PlusCircle,
+    Volume,
+    VolumeOff,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { FC, useCallback, useMemo, useState } from "react";
 import { useVoting } from "@/components/feed/player/useVoting.ts";
@@ -11,6 +17,9 @@ type Props = {
     benis: number;
     loading: boolean;
     commentResponses: never[];
+    isMuted: boolean;
+    unMute: VoidFunction;
+    mute: VoidFunction;
 };
 
 export const SideBar: FC<Props> = ({
@@ -18,6 +27,9 @@ export const SideBar: FC<Props> = ({
     benis,
     commentResponses,
     loading,
+    mute,
+    unMute,
+    isMuted,
 }) => {
     const [benisTmp, setBenisTmp] = useState<number>(benis);
     const { isUp, downvote, upvote, revokeVote, isDown } = useVoting();
@@ -116,6 +128,14 @@ export const SideBar: FC<Props> = ({
                     <Skeleton className={"h-2 w-4"} />
                 ) : (
                     <span>{commentResponses.length}</span>
+                )}
+            </div>
+
+            <div className={"flex flex-col items-center justify-center"}>
+                {isMuted ? (
+                    <VolumeOff onClick={unMute} size={33} />
+                ) : (
+                    <Volume size={33} onClick={mute} />
                 )}
             </div>
         </div>
