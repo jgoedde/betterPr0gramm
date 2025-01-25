@@ -1,7 +1,5 @@
 import useSWRImmutable from "swr/immutable";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
-import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
-import { Fetcher } from "swr";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {
@@ -17,10 +15,7 @@ type GetInfoResponse = {
     tags: TagResponse[];
     comments: CommentResponse[];
 };
-const fetcher: Fetcher<GetInfoResponse, [string, Cookies]> = async ([
-    url,
-    cookies,
-]) => {
+const fetcher = async (url: string) => {
     console.log("trying to cache " + url);
 
     /*
@@ -46,9 +41,7 @@ const fetcher: Fetcher<GetInfoResponse, [string, Cookies]> = async ([
 
     const response = await fetch(url, {
         method: "GET",
-        headers: {
-            ...buildCookiesHeader(cookies),
-        },
+        credentials: "include",
     });
 
     await new Promise((res) => {
@@ -59,10 +52,8 @@ const fetcher: Fetcher<GetInfoResponse, [string, Cookies]> = async ([
 };
 
 export function useUploadInfo(uploadId: number) {
-    const cookies = useAuth().cookies;
-
     const { data, isLoading } = useSWRImmutable(
-        [`${BASE_URL}/api/items/info?itemId=${uploadId}`, cookies],
+        `${BASE_URL}/api/items/info?itemId=${uploadId}`,
         fetcher
     );
 

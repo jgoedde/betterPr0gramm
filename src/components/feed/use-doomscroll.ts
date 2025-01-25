@@ -1,8 +1,7 @@
 import { Upload } from "@/components/feed/Upload.ts";
 import { useCallback, useEffect, useState } from "react";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
-import useSWR, { Fetcher } from "swr";
-import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
+import useSWR from 'swr';
 
 type ItemResponse = {
     id: number;
@@ -19,15 +18,10 @@ type GetPostsResponse = {
 
 const TAKE_VIDEOS = 3;
 
-const fetcher: Fetcher<GetPostsResponse, [string, Cookies]> = async ([
-    url,
-    cookies,
-]) => {
+const fetcher = async (url: string) => {
     const response = await fetch(url, {
         method: "GET",
-        headers: {
-            ...buildCookiesHeader(cookies),
-        },
+        credentials: "include",
     });
 
     return (await response.json()) as GetPostsResponse;
@@ -38,12 +32,10 @@ export function useDoomscroll(currentIndex: number) {
     const [videos, setVideos] = useState<Upload[]>([]);
     const [feed, setFeed] = useState<Upload[]>([]);
 
-    const cookies = useAuth().cookies;
-
     /* only while developing */
     const { data } = useSWR(
-        ["neu", `${BASE_URL}/api/items/get?flags=1`, cookies],
-        ([, url]) => fetcher([url, cookies!])
+        ["neu", `${BASE_URL}/api/items/get?flags=1`],
+        ([, url]) => fetcher(url)
     );
 
     useEffect(() => {

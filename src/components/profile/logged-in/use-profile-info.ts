@@ -1,16 +1,10 @@
 import useSWRImmutable from "swr/immutable";
-import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
-import { Fetcher } from "swr";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 
-const fetcher: Fetcher<GetProfileResponse, [string, Cookies]> = async ([
-    url,
-    cookies,
-]) => {
+const fetcher = async (url: string) => {
     const response = await fetch(url, {
-        method: "GET",
         credentials: "include",
-        headers: { ...buildCookiesHeader(cookies) },
+        method: "GET",
     });
 
     return (await response.json()) as GetProfileResponse;
@@ -32,7 +26,6 @@ type UploadResponse = {
     preview: string | null;
     flags: number;
 };
-
 type GetProfileResponse = {
     user: {
         id: number;
@@ -48,11 +41,10 @@ type GetProfileResponse = {
 };
 
 export function useProfileInfo(nickname: string) {
-    const { cookies } = useAuth();
     const { isLoading, data } = useSWRImmutable(
-        [`${BASE_URL}/api/profile/info?name=${nickname}&flags=9`, cookies!],
+        `${BASE_URL}/api/profile/info?name=${nickname}&flags=9`,
         fetcher
-    );
+    ); // TODO: Should not be immutable but now for testing to not make so many requests...
 
     return { isLoading, data };
 }

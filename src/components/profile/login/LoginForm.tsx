@@ -1,52 +1,50 @@
 import { FC, useCallback, useState } from "react";
 import { useToast } from "@/hooks/use-toast.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { ToastAction } from "@/components/ui/toast.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { useAuth } from "@/hooks/use-auth.ts";
+import { useCaptcha } from "./use-captcha.ts";
+import { useNavigation } from "@/hooks/use-navigation.tsx";
 
 export const LoginForm: FC = () => {
+    const captcha = useCaptcha();
     const { toast } = useToast();
+    const { goTo } = useNavigation();
 
-    const [ppCookie, setPpCookie] = useState("");
-    const [meCookie, setMeCookie] = useState("");
-
-    const { updateCookies } = useAuth();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [captchaStr, setCaptchaStr] = useState("");
 
     const login = useCallback(async () => {
-        try {
-            const parsedPpCookie = ppCookie.replace('pp:"', "").split('"')[0];
-            const parsedMeCookie = JSON.parse(
-                decodeURIComponent(meCookie.replace('me:"', "").split('"')[0])
-            );
+        if (
+            username === "" ||
+            password === "" ||
+            captchaStr === "" ||
+            !captcha
+        ) {
+            return;
+        }
 
-            updateCookies({ me: parsedMeCookie, pp: parsedPpCookie });
+        const response = await fetch(`${BASE_URL}/api/user/login`, {
+            headers: {
+                "content-type":
+                    "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
+            method: "POST",
+            credentials: "include",
+        });
 
+        if (response.ok) {
             toast({
                 title: "Successfully logged in!",
-                description: `You are now logged in as ${parsedMeCookie.n}. Access your uploads, collections & comments.`,
+                description: `You are now logged in as ${username}. Access your uploads, collections & comments.`,
                 action: (
                     <ToastAction
                         onClick={() => {
-                            location.reload();
-                        }}
-                        altText="Refresh"
-                    >
-                        Show my profile!
-                    </ToastAction>
-                ),
-            });
-        } catch (e) {
-            console.error(e);
-            toast({
-                title: "That didn't work!",
-                variant: "destructive",
-                description: `There was en error while reading your cookie. Please try again.`,
-                action: (
-                    <ToastAction
-                        onClick={() => {
-                            location.reload();
+                            goTo("profile");
                         }}
                         altText="Refresh"
                     >
@@ -55,38 +53,64 @@ export const LoginForm: FC = () => {
                 ),
             });
         }
-    }, [meCookie, ppCookie, toast, updateCookies]);
+    }, [captcha, captchaStr, goTo, password, toast, username]);
+
+    if (!captcha) {
+        return <>Loading...</>;
+    }
 
     return (
         <div className="min-h-full px-6">
             <div className="mt-10">
                 <div className="space-y-6">
                     <div>
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="me-cookie">"Me"-Cookie</Label>
-                        </div>
+                        <Label htmlFor="username">Username</Label>
                         <div className="mt-2">
                             <Input
-                                name="me-cookie"
                                 type="text"
-                                id="me-cookie"
-                                value={meCookie}
-                                onChange={(e) => setMeCookie(e.target.value)}
+                                name="username"
+                                id="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                             />
                         </div>
                     </div>
 
                     <div>
-                        <Label htmlFor="pp-cookie">"PP"-Cookie</Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="password">Password</Label>
+                        </div>
                         <div className="mt-2">
                             <Input
-                                type="text"
-                                name="pp-cookie"
-                                id="pp-cookie"
-                                value={ppCookie}
-                                onChange={(e) => setPpCookie(e.target.value)}
+                                type="password"
+                                name="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="current-password"
                                 required
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <img src={`${captcha.captcha}`} alt={"Captcha"} />
+                    </div>
+
+                    <div>
+                        <Label htmlFor="captcha">Captcha</Label>
+
+                        <div className="mt-2">
+                            <Input
+                                autoCapitalize={"on"}
+                                type="text"
+                                value={captchaStr}
+                                onChange={(e) => setCaptchaStr(e.target.value)}
+                                name="captcha"
+                                id="captcha"
+                                required
+                                className="w-1/4"
                             />
                         </div>
                     </div>
