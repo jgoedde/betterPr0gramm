@@ -1,50 +1,52 @@
 import { FC, useCallback, useState } from "react";
 import { useToast } from "@/hooks/use-toast.ts";
-import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { ToastAction } from "@/components/ui/toast.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { useCaptcha } from "./use-captcha.ts";
-import { useNavigation } from "@/hooks/use-navigation.tsx";
+import { useAuth } from "@/hooks/use-auth.ts";
 
 export const LoginForm: FC = () => {
-    const captcha = useCaptcha();
     const { toast } = useToast();
-    const { goTo } = useNavigation();
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [captchaStr, setCaptchaStr] = useState("");
+    const [ppCookie, setPpCookie] = useState("");
+    const [meCookie, setMeCookie] = useState("");
+
+    const { updateCookies } = useAuth();
 
     const login = useCallback(async () => {
-        if (
-            username === "" ||
-            password === "" ||
-            captchaStr === "" ||
-            !captcha
-        ) {
-            return;
-        }
+        try {
+            const parsedPpCookie = ppCookie.replace('pp:"', "").split('"')[0];
+            const parsedMeCookie = JSON.parse(
+                decodeURIComponent(meCookie.replace('me:"', "").split('"')[0])
+            );
 
-        const response = await fetch(`${BASE_URL}/api/user/login`, {
-            headers: {
-                "content-type":
-                    "application/x-www-form-urlencoded; charset=UTF-8",
-            },
-            body: `name=${username}&password=${password}&captcha=${captchaStr}&token=${captcha.token}`,
-            method: "POST",
-            credentials: "include",
-        });
+            updateCookies({ me: parsedMeCookie, pp: parsedPpCookie });
 
-        if (response.ok) {
             toast({
                 title: "Successfully logged in!",
-                description: `You are now logged in as ${username}. Access your uploads, collections & comments.`,
+                description: `You are now logged in as ${parsedMeCookie.n}. Access your uploads, collections & comments.`,
                 action: (
                     <ToastAction
                         onClick={() => {
-                            goTo("profile");
+                            location.reload();
+                        }}
+                        altText="Refresh"
+                    >
+                        Show my profile!
+                    </ToastAction>
+                ),
+            });
+        } catch (e) {
+            console.error(e);
+            toast({
+                title: "That didn't work!",
+                variant: "destructive",
+                description: `There was en error while reading your cookie. Please try again.`,
+                action: (
+                    <ToastAction
+                        onClick={() => {
+                            location.reload();
                         }}
                         altText="Refresh"
                     >
@@ -53,64 +55,38 @@ export const LoginForm: FC = () => {
                 ),
             });
         }
-    }, [captcha, captchaStr, goTo, password, toast, username]);
-
-    if (!captcha) {
-        return <>Loading...</>;
-    }
+    }, [meCookie, ppCookie, toast, updateCookies]);
 
     return (
         <div className="min-h-full px-6">
             <div className="mt-10">
                 <div className="space-y-6">
                     <div>
-                        <Label htmlFor="username">Username</Label>
-                        <div className="mt-2">
-                            <Input
-                                type="text"
-                                name="username"
-                                id="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div>
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="me-cookie">"Me"-Cookie</Label>
                         </div>
                         <div className="mt-2">
                             <Input
-                                type="password"
-                                name="password"
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                autoComplete="current-password"
+                                name="me-cookie"
+                                type="text"
+                                id="me-cookie"
+                                value={meCookie}
+                                onChange={(e) => setMeCookie(e.target.value)}
                                 required
                             />
                         </div>
                     </div>
 
                     <div>
-                        <img src={`${captcha.captcha}`} alt={"Captcha"} />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="captcha">Captcha</Label>
-
+                        <Label htmlFor="pp-cookie">"PP"-Cookie</Label>
                         <div className="mt-2">
                             <Input
-                                autoCapitalize={"on"}
                                 type="text"
-                                value={captchaStr}
-                                onChange={(e) => setCaptchaStr(e.target.value)}
-                                name="captcha"
-                                id="captcha"
+                                name="pp-cookie"
+                                id="pp-cookie"
+                                value={ppCookie}
+                                onChange={(e) => setPpCookie(e.target.value)}
                                 required
-                                className="w-1/4"
                             />
                         </div>
                     </div>
