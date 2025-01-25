@@ -6,9 +6,9 @@ export const ContentWrapper = () => {
     const { view } = useNavigation();
 
     return (
-        <div className="grow">
+        <div className="basis-11/12">
             {view === "home" && (
-                <div className={"bg-home-background text-home-color"}>
+                <div className={"bg-home-background text-home-color h-full"}>
                     <HomeFeed />
                 </div>
             )}

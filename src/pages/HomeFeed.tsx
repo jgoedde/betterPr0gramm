@@ -71,16 +71,16 @@ export function HomeFeed() {
                     setSearchOptions={setSearchOptions}
                 />
             </PopoverContent>
-            <div className={"relative"}>
+            <div className={"relative h-full"}>
                 <Carousel
                     opts={{
                         align: "start",
                     }}
                     orientation="vertical"
-                    className="w-full"
+                    className="w-full h-full"
                     setApi={setApi}
                 >
-                    <CarouselContent className={"h-[calc(100vh-4rem)]"}>
+                    <CarouselContent>
                         {videos.map((video) => (
                             <CarouselItem key={video.id} className="relative">
                                 <Video

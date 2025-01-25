@@ -8,7 +8,7 @@ export function BottomNavigation() {
     return (
         <div
             className={cn(
-                "z-50 w-full h-16 flex-none",
+                "z-50 w-full h-16 basis-1/12",
                 view === "home"
                     ? "bg-home-background text-home-color"
                     : "bg-background text-foreground"
