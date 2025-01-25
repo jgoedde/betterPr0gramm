@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ProfileOverview } from "@/components/profile/logged-in/ProfileOverview.tsx";
-import { useCookie } from "@/hooks/use-cookie.ts";
 import { LoginForm } from "@/components/profile/login/LoginForm.tsx";
+import { useCookie } from "react-use";
 
 /*
 async function logout() {
@@ -18,15 +18,31 @@ async function logout() {
  */
 
 export function ProfilePage() {
-    const { cookieValJson } = useCookie<{ n: string }>("me");
+    const [meCookieStr] = useCookie("me");
+
+    const meCookie = useMemo(() => {
+        console.info("Parsing `me` cookie", meCookieStr, "...");
+        if (!meCookieStr) {
+            return undefined;
+        }
+        try {
+            return JSON.parse(meCookieStr) as { n: string };
+        } catch (e) {
+            if (e instanceof Error) {
+                console.error("Unable to parse cookie");
+                console.error(e);
+            }
+            return undefined;
+        }
+    }, [meCookieStr]);
 
     const isLoggedIn = useMemo(() => {
-        return cookieValJson?.n != null;
-    }, [cookieValJson?.n]);
+        return meCookie?.n != null;
+    }, [meCookie?.n]);
 
     if (!isLoggedIn) {
         return <LoginForm />;
     }
 
-    return <ProfileOverview nickname={cookieValJson!.n} />;
+    return <ProfileOverview nickname={meCookie!.n} />;
 }
