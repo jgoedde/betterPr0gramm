@@ -20,7 +20,7 @@ export function useCaptcha() {
                 headers: {
                     accept: "application/json, text/javascript, */*; q=0.01",
                 },
-                credentials: "include",
+                // credentials: "include",
                 method: "GET",
             }
         );

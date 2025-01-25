@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ProfileOverview } from "@/components/profile/logged-in/ProfileOverview.tsx";
-import { useCookie } from "@/hooks/use-cookie.ts";
 import { LoginForm } from "@/components/profile/login/LoginForm.tsx";
+import { useAuth } from "@/hooks/use-auth.ts";
 
 /*
 async function logout() {
@@ -18,15 +18,15 @@ async function logout() {
  */
 
 export function ProfilePage() {
-    const { cookieValJson } = useCookie<{ n: string }>("me");
+    const { cookies } = useAuth();
 
     const isLoggedIn = useMemo(() => {
-        return cookieValJson?.n != null;
-    }, [cookieValJson?.n]);
+        return cookies?.me.n != null;
+    }, [cookies?.me.n]);
 
     if (!isLoggedIn) {
         return <LoginForm />;
     }
 
-    return <ProfileOverview nickname={cookieValJson!.n} />;
+    return <ProfileOverview />;
 }

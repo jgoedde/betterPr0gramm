@@ -13,8 +13,13 @@ import {
 } from "@/components/ui/tabs.tsx";
 import { useProfileInfo } from "@/components/profile/logged-in/use-profile-info.ts";
 import { Button } from "@/components/ui/button.tsx";
+import { useAuth } from "@/hooks/use-auth.ts";
 
-export const ProfileOverview: FC<{ nickname: string }> = ({ nickname }) => {
+export const ProfileOverview: FC = () => {
+    const { cookies } = useAuth();
+
+    const nickname = cookies!.me.n;
+
     const { isLoading, data } = useProfileInfo(nickname);
 
     console.log(isLoading, "isLoading");
