@@ -33,6 +33,7 @@ export const Video: FC<Props> = ({ upload, currentVideoId }) => {
             <BottomBar
                 tags={tags.map((tr) => ({ name: tr.tag, id: tr.id }))}
                 loading={isLoading}
+                uploader={upload.uploaderName}
             />
 
             <SideBar

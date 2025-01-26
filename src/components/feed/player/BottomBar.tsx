@@ -8,9 +8,10 @@ import { FC, useEffect, useMemo, useState } from "react";
 type Props = {
     loading: boolean;
     tags: Tag[];
+    uploader: string;
 };
 
-export const BottomBar: FC<Props> = ({ loading, tags }) => {
+export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
     const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
     const [truncate, setTruncate] = useState<"truncate" | "">("");
 
@@ -66,7 +67,10 @@ export const BottomBar: FC<Props> = ({ loading, tags }) => {
                             <Skeleton className="h-3 max-w-[360px]" />
                         </>
                     ) : (
-                        <div className="font-bold text-lg">{topTag}</div>
+                        <>
+                            <div className="font-bold text-lg">{topTag}</div>
+                            <div className="">von {uploader}</div>
+                        </>
                     )}
                 </div>
                 <div
