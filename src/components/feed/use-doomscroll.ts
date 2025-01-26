@@ -1,11 +1,13 @@
-import { Upload } from "@/components/feed/Upload.ts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
 import { FeedPreferences } from "@/components/feed/use-preferences.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
+import { uniqBy } from "lodash";
 
 type ItemResponse = {
+    height: number;
+    width: number;
     id: number;
     up: number;
     down: number;
@@ -18,7 +20,7 @@ type GetPostsResponse = {
     items: ItemResponse[];
 };
 
-const TAKE_VIDEOS = 3;
+const TAKE_POSTS = 3;
 
 type CacheKey = {
     contentType: number;
@@ -53,8 +55,8 @@ export function useDoomscroll(
     currentIndex: number,
     feedPreferences: FeedPreferences
 ) {
-    const [videos, setVideos] = useState<Upload[]>([]);
-    const [feed, setFeed] = useState<Upload[]>([]);
+    const [uploads, setUploads] = useState<ItemResponse[]>([]);
+    const [feed, setFeed] = useState<FeedItem[]>([]);
 
     const cookies = useAuth().cookies;
 
@@ -62,7 +64,7 @@ export function useDoomscroll(
      * Clear everything on Neu/Beliebt switch
      */
     useEffect(() => {
-        setVideos([]);
+        setUploads([]);
         setFeed([]);
     }, [feedPreferences.feed]);
 
@@ -81,66 +83,85 @@ export function useDoomscroll(
             return;
         }
 
-        const newUploads = data.items.filter(onlyMp4s).map(toUpload);
+        const newUploads = data.items;
 
-        setVideos((prevVideos) => {
+        setUploads((prevItems) => {
             const uniqueUploads = newUploads.filter(
-                (item) => !prevVideos.some((video) => video.id === item.id)
+                (item) => !prevItems.some((prevItem) => prevItem.id === item.id)
             );
 
             if (uniqueUploads.length === 0) {
-                return prevVideos;
+                return prevItems;
             }
 
-            if (prevVideos.length > 0) {
+            if (prevItems.length > 0) {
                 console.info("Found new uploads! Inserting them at cursor...");
                 console.info(uniqueUploads);
                 console.log(
-                    "existing videos before inserting new ones",
-                    prevVideos
+                    "existing uploads before inserting new ones",
+                    prevItems
                 );
             }
 
-            const after = prevVideos.slice(currentIndex + 1);
-            const before = prevVideos.slice(0, currentIndex + 1);
+            const after = prevItems.slice(currentIndex + 1);
+            const before = prevItems.slice(0, currentIndex + 1);
             return [...before, ...uniqueUploads, ...after];
         });
     }, [data?.items, currentIndex]);
 
     //#region seed
     useEffect(() => {
-        if (feed.length === 0 && videos.length > 0) {
-            setFeed(videos.slice(0, TAKE_VIDEOS));
+        if (feed.length === 0 && uploads.length > 0) {
+            setFeed(uploads.slice(0, TAKE_POSTS).map(buildFeedItem));
         }
-    }, [feed.length, videos]);
+    }, [feed.length, uploads]);
     //#endregion
 
-    function toUpload(res: ItemResponse): Upload {
-        return {
-            id: res.id,
-            src: `https://vid.pr0gramm.com/${res.image}`,
-            uploadedAt: new Date(Number(res.created + "000")),
-            uploaderName: res.user,
-            benis: res.up - res.down,
-        };
-    }
+    const next = useMemo(() => {
+        return uploads
+            .slice(currentIndex, currentIndex + TAKE_POSTS)
+            .map(buildFeedItem);
+    }, [currentIndex, uploads]);
 
     const loadMore = useCallback(() => {
         setFeed((prev) =>
-            [
-                ...prev, // ## This prevents layout shifts ##
-                ...videos.slice(currentIndex, currentIndex + TAKE_VIDEOS),
-            ].filter(onlyUnique)
+            uniqBy(
+                [
+                    ...prev, // ## This prevents layout shifts ##
+                    ...next,
+                ],
+                "id"
+            )
         );
-    }, [currentIndex, videos]);
+    }, [next]);
 
-    return { videos: feed, loadMore, isLoading };
+    return { feed, loadMore, isLoading };
 }
 
-function onlyUnique<T>(value: T, index: number, array: T[]) {
-    return array.indexOf(value) === index;
-}
+export type FeedItem = {
+    id: number;
+    src: string;
+    benis: number;
+    uploaderName: string;
+    uploadedAt: Date;
+    height: number;
+    width: number;
+    type: "video" | "image";
+};
 
-function onlyMp4s(media: ItemResponse) {
-    return media.image.includes(".mp4");
+function buildFeedItem(res: ItemResponse): FeedItem {
+    const type = res.image.includes("mp4") ? "video" : "image";
+    return {
+        id: res.id,
+        src:
+            type === "image"
+                ? `https://img.pr0gramm.com/${res.image}`
+                : `https://vid.pr0gramm.com/${res.image}`,
+        uploadedAt: new Date(Number(res.created + "000")),
+        uploaderName: res.user,
+        benis: res.up - res.down,
+        height: res.height,
+        width: res.width,
+        type,
+    };
 }

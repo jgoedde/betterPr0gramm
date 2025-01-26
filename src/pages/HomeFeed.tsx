@@ -4,7 +4,7 @@ import {
     CarouselContent,
     CarouselItem,
 } from "@/components/ui/carousel.tsx";
-import { Video } from "@/components/feed/player/Video.tsx";
+import { Upload } from "@/components/feed/player/Upload.tsx";
 import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
 import { usePreferences } from "@/components/feed/use-preferences.ts";
@@ -15,7 +15,7 @@ export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
     const [currentSlide, setCurrentSlide] = useState<number>(0);
     const { preferences } = usePreferences();
-    const { videos, loadMore, isLoading } = useDoomscroll(
+    const { feed, loadMore, isLoading } = useDoomscroll(
         currentSlide,
         preferences
     );
@@ -29,7 +29,7 @@ export function HomeFeed() {
     }, [api, preferences.feed]);
 
     /**
-     * A slide animation was fulfilled. Either we jumped to the next or previous video.
+     * A slide animation was fulfilled. Either we jumped to the next or previous video/image.
      */
     const onSettle = useCallback(() => {
         loadMore();
@@ -58,6 +58,10 @@ export function HomeFeed() {
         };
     }, [api, onSelect, onSettle]);
 
+    useEffect(() => {
+        console.log(feed, "feed");
+    }, [feed]);
+
     return (
         <div className={"relative h-full"}>
             <Carousel
@@ -69,17 +73,21 @@ export function HomeFeed() {
                 setApi={setApi}
             >
                 <CarouselContent>
-                    {videos.map((video) => (
-                        <CarouselItem key={video.id} className="relative">
-                            <Video
-                                upload={video}
-                                currentVideoId={videos[currentSlide].id}
+                    {feed.map((upload) => (
+                        <CarouselItem
+                            key={`carousel-item-upload-${upload.id}`}
+                            className="relative"
+                        >
+                            <Upload
+                                key={`upload-${upload.id}`}
+                                upload={upload}
+                                currentUploadId={feed[currentSlide].id}
                             />
                         </CarouselItem>
                     ))}
                 </CarouselContent>
             </Carousel>
-            {isLoading && videos.length === 0 && (
+            {isLoading && feed.length === 0 && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <Spinner />
                 </div>

@@ -4,4 +4,5 @@ export type Upload = {
     benis: number;
     uploaderName: string;
     uploadedAt: Date;
+    type: "image" | "video";
 };

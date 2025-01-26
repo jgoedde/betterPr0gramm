@@ -2,7 +2,7 @@ import { Tag } from "@/components/feed/player/Tag.tsx";
 import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { TagButton } from "@/components/feed/player/TagButton.tsx";
-import { DEFAULT_TAGS_SHOWN_COUNT } from "@/components/feed/player/Video.tsx";
+import { DEFAULT_TAGS_SHOWN_COUNT } from "@/components/feed/player/Upload.tsx";
 import { FC, useEffect, useMemo, useState } from "react";
 
 type Props = {

@@ -18,9 +18,11 @@ type Props = {
     benis: number;
     loading: boolean;
     commentResponses: never[];
-    isMuted: boolean;
-    unMute: VoidFunction;
-    mute: VoidFunction;
+    videoControls?: {
+        isMuted: boolean;
+        unMute: VoidFunction;
+        mute: VoidFunction;
+    };
 };
 
 export const SideBar: FC<Props> = ({
@@ -28,9 +30,7 @@ export const SideBar: FC<Props> = ({
     benis,
     commentResponses,
     loading,
-    mute,
-    unMute,
-    isMuted,
+    videoControls,
 }) => {
     const [benisTmp, setBenisTmp] = useState<number>(benis);
     const { isUp, downvote, upvote, revokeVote, isDown } = useVoting();
@@ -56,7 +56,6 @@ export const SideBar: FC<Props> = ({
                     vote,
                     _nonce: nonce,
                 }),
-                // body: `id=${uploadId}&vote=${vote}&_nonce=${cookies.me.id.slice(0, 16)}`, // nonce = "id" from "me" cookie 16 chars
             });
         },
         [cookies, nonce, uploadId]
@@ -134,13 +133,15 @@ export const SideBar: FC<Props> = ({
                 </DrawerTrigger>
             </div>
 
-            <div className={"flex flex-col items-center justify-center"}>
-                {isMuted ? (
-                    <VolumeOff onClick={unMute} size={33} />
-                ) : (
-                    <Volume size={33} onClick={mute} />
-                )}
-            </div>
+            {videoControls != null && (
+                <div className={"flex flex-col items-center justify-center"}>
+                    {videoControls.isMuted ? (
+                        <VolumeOff onClick={videoControls.unMute} size={33} />
+                    ) : (
+                        <Volume size={33} onClick={videoControls.mute} />
+                    )}
+                </div>
+            )}
         </div>
     );
 };
