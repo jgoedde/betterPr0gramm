@@ -7,14 +7,14 @@ import {
 import { Video } from "@/components/feed/player/Video.tsx";
 import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
-import { cn } from "@/lib/utils.ts";
 import { usePreferences } from "@/components/feed/use-preferences.ts";
 import { Spinner } from "@/components/ui/spinner.tsx";
+import { ContentTypeSelector } from "@/components/feed/ContentTypeSelector.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
     const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const { preferences, setFeed } = usePreferences();
+    const { preferences } = usePreferences();
     const { videos, loadMore, isLoading } = useDoomscroll(
         currentSlide,
         preferences
@@ -84,31 +84,8 @@ export function HomeFeed() {
                     <Spinner />
                 </div>
             )}
-            <div
-                className={
-                    "absolute top-2 left-1/2 text-white -translate-x-1/2"
-                }
-            >
-                <div className={"flex flex-row gap-5 text-lg"}>
-                    <button
-                        className={cn(
-                            preferences.feed === "beliebt" && "underline",
-                            "underline-offset-4"
-                        )}
-                        onClick={() => setFeed("beliebt")}
-                    >
-                        Beliebt
-                    </button>
-                    <button
-                        className={cn(
-                            preferences.feed === "neu" && "underline",
-                            "underline-offset-4"
-                        )}
-                        onClick={() => setFeed("neu")}
-                    >
-                        Neu
-                    </button>
-                </div>
+            <div className={"absolute top-2 left-1/2 -translate-x-1/2"}>
+                <ContentTypeSelector />
             </div>
         </div>
     );
