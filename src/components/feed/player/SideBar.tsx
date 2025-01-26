@@ -12,12 +12,13 @@ import { cn } from "@/lib/utils";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
+import { Comment } from "@/components/feed/comments/Comment.ts";
 
 type Props = {
     uploadId: number;
     benis: number;
-    loading: boolean;
-    commentResponses: never[];
+    isLoading: boolean;
+    comments: Comment[];
     videoControls?: {
         isMuted: boolean;
         unMute: VoidFunction;
@@ -28,8 +29,8 @@ type Props = {
 export const SideBar: FC<Props> = ({
     uploadId,
     benis,
-    commentResponses,
-    loading,
+    comments,
+    isLoading,
     videoControls,
 }) => {
     const [benisTmp, setBenisTmp] = useState<number>(benis);
@@ -125,10 +126,10 @@ export const SideBar: FC<Props> = ({
                 <DrawerTrigger>
                     <MessageSquareMore size={33} />
 
-                    {loading ? (
+                    {isLoading ? (
                         <Skeleton className={"h-2 w-4"} />
                     ) : (
-                        <span>{commentResponses.length}</span>
+                        <span>{comments.length}</span>
                     )}
                 </DrawerTrigger>
             </div>

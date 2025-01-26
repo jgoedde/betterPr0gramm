@@ -57,8 +57,8 @@ export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
             <SideBar
                 uploadId={upload.id}
                 benis={upload.benis}
-                loading={isLoading}
-                commentResponses={comments as never[]}
+                isLoading={isLoading}
+                comments={comments as never[]}
                 // isMuted={isMuted}
                 // mute={mute}
                 // unMute={unMute}
