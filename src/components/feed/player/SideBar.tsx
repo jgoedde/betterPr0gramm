@@ -13,17 +13,15 @@ import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
 import { Comment } from "@/components/feed/comments/Comment.ts";
+import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
+import { Upload } from "@/components/feed/Upload.ts";
 
 type Props = {
     uploadId: number;
     benis: number;
     isLoading: boolean;
     comments: Comment[];
-    videoControls?: {
-        isMuted: boolean;
-        unMute: VoidFunction;
-        mute: VoidFunction;
-    };
+    uploadType: Upload["type"];
 };
 
 export const SideBar: FC<Props> = ({
@@ -31,11 +29,12 @@ export const SideBar: FC<Props> = ({
     benis,
     comments,
     isLoading,
-    videoControls,
+    uploadType,
 }) => {
     const [benisTmp, setBenisTmp] = useState<number>(benis);
     const { isUp, downvote, upvote, revokeVote, isDown } = useVoting();
     const { cookies } = useAuth();
+    const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
 
     const nonce = useMemo(() => {
         if (cookies == null) {
@@ -134,12 +133,18 @@ export const SideBar: FC<Props> = ({
                 </DrawerTrigger>
             </div>
 
-            {videoControls != null && (
+            {uploadType === "video" && (
                 <div className={"flex flex-col items-center justify-center"}>
-                    {videoControls.isMuted ? (
-                        <VolumeOff onClick={videoControls.unMute} size={33} />
+                    {shouldPlayAudio ? (
+                        <Volume
+                            size={33}
+                            onClick={() => setShouldPlayAudio(false)}
+                        />
                     ) : (
-                        <Volume size={33} onClick={videoControls.mute} />
+                        <VolumeOff
+                            onClick={() => setShouldPlayAudio(true)}
+                            size={33}
+                        />
                     )}
                 </div>
             )}

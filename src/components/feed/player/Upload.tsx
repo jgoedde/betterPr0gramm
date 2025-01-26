@@ -53,15 +53,12 @@ export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
                 loading={isLoading}
                 uploader={upload.uploaderName}
             />
-
             <SideBar
                 uploadId={upload.id}
                 benis={upload.benis}
                 isLoading={isLoading}
                 comments={comments as never[]}
-                // isMuted={isMuted}
-                // mute={mute}
-                // unMute={unMute}
+                uploadType={upload.type}
             />
 
             <div className="absolute inset-0 flex items-center justify-center">
