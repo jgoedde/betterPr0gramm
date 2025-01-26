@@ -7,12 +7,6 @@ import {
 import { Video } from "@/components/feed/player/Video.tsx";
 import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
-import { Popover, PopoverContent } from "@/components/ui/popover.tsx";
-import {
-    SearchOptions,
-    SearchPopoverForm,
-} from "@/components/SearchPopoverForm.tsx";
-import { SearchPopoverButton } from "@/components/SearchPopoverButton.tsx";
 import { cn } from "@/lib/utils.ts";
 import { usePreferences } from "@/components/feed/use-preferences.ts";
 import { Spinner } from "@/components/ui/spinner.tsx";
@@ -25,11 +19,6 @@ export function HomeFeed() {
         currentSlide,
         preferences
     );
-    const [searchOptions, setSearchOptions] = useState<SearchOptions>({
-        minimumBenis: 0,
-        text: "",
-        excludedText: "",
-    });
 
     useEffect(() => {
         if (!api) {
@@ -69,81 +58,58 @@ export function HomeFeed() {
         };
     }, [api, onSelect, onSettle]);
 
-    const applyFilters = useCallback(() => {}, []);
-
     return (
-        <Popover // TODO: Replace with drawer?
-            onOpenChange={(isOpen) => {
-                if (!isOpen) {
-                    applyFilters();
-                }
-            }}
-        >
-            <PopoverContent className="w-80">
-                <SearchPopoverForm
-                    searchOptions={searchOptions}
-                    setSearchOptions={setSearchOptions}
-                />
-            </PopoverContent>
-            <div className={"relative h-full"}>
-                <Carousel
-                    opts={{
-                        align: "start",
-                    }}
-                    orientation="vertical"
-                    className="w-full h-full"
-                    setApi={setApi}
-                >
-                    <CarouselContent>
-                        {videos.map((video) => (
-                            <CarouselItem key={video.id} className="relative">
-                                <Video
-                                    upload={video}
-                                    currentVideoId={videos[currentSlide].id}
-                                />
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-                <div
-                    className={
-                        "absolute top-2 right-2 bg-foreground p-1 rounded-lg"
-                    }
-                >
-                    <SearchPopoverButton />
+        <div className={"relative h-full"}>
+            <Carousel
+                opts={{
+                    align: "start",
+                }}
+                orientation="vertical"
+                className="w-full h-full"
+                setApi={setApi}
+            >
+                <CarouselContent>
+                    {videos.map((video) => (
+                        <CarouselItem key={video.id} className="relative">
+                            <Video
+                                upload={video}
+                                currentVideoId={videos[currentSlide].id}
+                            />
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+            </Carousel>
+            {isLoading && videos.length === 0 && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <Spinner />
                 </div>
-                {isLoading && videos.length === 0 && (
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <Spinner />
-                    </div>
-                )}
-                <div
-                    className={
-                        "absolute top-2 left-1/2 text-white -translate-x-1/2"
-                    }
-                >
-                    <div className={"flex flex-row gap-5 text-lg"}>
-                        <button
-                            className={cn(
-                                preferences.feed === "beliebt" && "underline",
-                                "underline-offset-4"
-                            )}
-                            onClick={() => setFeed("beliebt")}
-                        >
-                            Beliebt
-                        </button>
-                        <button
-                            className={cn(
-                                preferences.feed === "neu" && "underline",
-                                "underline-offset-4"
-                            )}
-                            onClick={() => setFeed("neu")}
-                        >
-                            Neu
-                        </button>
-                    </div>
+            )}
+            <div
+                className={
+                    "absolute top-2 left-1/2 text-white -translate-x-1/2"
+                }
+            >
+                <div className={"flex flex-row gap-5 text-lg"}>
+                    <button
+                        className={cn(
+                            preferences.feed === "beliebt" && "underline",
+                            "underline-offset-4"
+                        )}
+                        onClick={() => setFeed("beliebt")}
+                    >
+                        Beliebt
+                    </button>
+                    <button
+                        className={cn(
+                            preferences.feed === "neu" && "underline",
+                            "underline-offset-4"
+                        )}
+                        onClick={() => setFeed("neu")}
+                    >
+                        Neu
+                    </button>
                 </div>
             </div>
-        </Popover>
+        </div>
     );
 }
