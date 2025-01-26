@@ -1,5 +1,5 @@
-import { useLocalStorage } from "react-use";
 import { useCallback } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 
 enum ContentMask {
     SFW = 1 << 0,
@@ -20,14 +20,15 @@ const DEFAULT: FeedPreferences = {
 };
 
 export function usePreferences() {
-    const [preferences, setPreferences] = useLocalStorage<FeedPreferences>(
-        "betterPr0gramm-feed"
-    );
+    const [preferences, setPreferences] = useLocalStorage<FeedPreferences>({
+        key: "betterPr0gramm-feed",
+        defaultValue: DEFAULT,
+    });
 
     const setContentType = useCallback(
         (contentType: number) => {
             setPreferences((prevState) => ({
-                ...(prevState ?? DEFAULT),
+                ...prevState,
                 contentType,
             }));
         },
@@ -37,7 +38,7 @@ export function usePreferences() {
     const setFeed = useCallback(
         (feed: FeedPreferences["feed"]) => {
             setPreferences((prevState) => ({
-                ...(prevState ?? DEFAULT),
+                ...prevState,
                 feed,
             }));
         },
@@ -45,7 +46,7 @@ export function usePreferences() {
     );
 
     return {
-        preferences: preferences ?? DEFAULT, // Should not be undefined?
+        preferences: preferences, // Should not be undefined?
         setContentType,
         setFeed,
     };
