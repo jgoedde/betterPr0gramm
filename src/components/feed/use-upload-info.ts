@@ -3,7 +3,7 @@ import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
 import { Fetcher } from "swr";
 import { Comment } from "@/components/feed/comments/Comment.ts";
-import { Tag } from "@/components/feed/player/Tag.tsx";
+import { Tag } from "@/components/feed/player/Tag.ts";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {

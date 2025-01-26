@@ -1,9 +1,8 @@
-import { Tag } from "@/components/feed/player/Tag.tsx";
+import { Tag } from "@/components/feed/player/Tag.ts";
 import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { TagButton } from "@/components/feed/player/TagButton.tsx";
-import { DEFAULT_TAGS_SHOWN_COUNT } from "@/components/feed/player/Upload.tsx";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
+import { Badge } from "@/components/ui/badge.tsx";
 
 type Props = {
     loading: boolean;
@@ -12,9 +11,6 @@ type Props = {
 };
 
 export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
-    const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
-    const [truncate, setTruncate] = useState<"truncate" | "">("");
-
     const topTag = useMemo(() => {
         const tag = tags[0]?.name;
         if (tag == null) {
@@ -24,43 +20,19 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
     }, [tags]);
 
     const otherTags = useMemo<Tag[]>(() => {
-        if (shouldShowAllTags) {
-            return tags.filter((t) => t.name !== topTag);
-        }
-
-        return tags
-            .filter((t) => t.name !== topTag)
-            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT);
-    }, [shouldShowAllTags, tags, topTag]);
-
-    // Gross...
-    useEffect(() => {
-        if (!shouldShowAllTags) {
-            setTimeout(() => {
-                setTruncate("truncate");
-            }, 1000);
-        } else {
-            setTruncate("");
-        }
-    }, [shouldShowAllTags]);
+        return tags.filter((t) => t.name !== topTag);
+    }, [tags, topTag]);
 
     return (
         <div
             className={"absolute bottom-0 left-0 w-full p-2 z-10"}
             style={{
-                ...(shouldShowAllTags && {
-                    boxShadow: "rgba(0, 0, 0, 0.5) 0px 0px 20px 20px",
-                    background: "rgba(0,0,0,0.5)",
-                }),
+                boxShadow: "rgba(0, 0, 0, 0.35) 0px 0px 20px 20px",
+                background: "rgba(0,0,0,0.35)",
             }}
         >
-            <div
-                className={cn(
-                    "flex-col w-5/6 text-white",
-                    shouldShowAllTags && ""
-                )}
-            >
-                <div>
+            <div className={"flex-col w-5/6 text-white"}>
+                <div className={"mb-3"}>
                     {loading ? (
                         <>
                             <Skeleton className="h-4 w-48 mb-2" />
@@ -75,32 +47,14 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                 </div>
                 <div
                     className={cn(
-                        "transition-all ease-in-out duration-1000",
-                        truncate,
-                        shouldShowAllTags
-                            ? "max-h-[200px] overflow-y-scroll"
-                            : "max-h-6"
+                        "overflow-x-auto flex flex-wrap flex-col h-8 space-x-2"
                     )}
                 >
                     {otherTags.map((t) => (
-                        <span key={t.id}>
-                            <TagButton tag={t.name} id={t.id} />
-                            {" • "}
-                        </span>
+                        <Badge key={"tag-" + t.id} variant={"secondary"}>
+                            {t.name}
+                        </Badge>
                     ))}
-                </div>
-                <div className="flex w-full justify-end">
-                    {!loading &&
-                        otherTags.length > DEFAULT_TAGS_SHOWN_COUNT && (
-                            <span
-                                className={"text-white text-opacity-75"}
-                                onClick={() =>
-                                    setShouldShowAllTags((prev) => !prev)
-                                }
-                            >
-                                {shouldShowAllTags ? "Weniger" : "Mehr"}
-                            </span>
-                        )}
                 </div>
             </div>
         </div>
