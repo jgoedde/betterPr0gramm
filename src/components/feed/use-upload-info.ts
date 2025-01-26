@@ -2,6 +2,8 @@ import useSWRImmutable from "swr/immutable";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
 import { Fetcher } from "swr";
+import { Comment } from "@/components/feed/comments/Comment.ts";
+import { Tag } from "@/components/feed/player/Tag.tsx";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {
@@ -66,9 +68,25 @@ export function useUploadInfo(uploadId: number) {
         fetcher
     );
 
+    function toComment(res: CommentResponse): Comment {
+        return {
+            content: res.content,
+            down: res.down,
+            up: res.up,
+            id: res.id,
+            created: new Date(Number(`${res.created}000`)),
+            name: res.name,
+            parent: res.parent,
+        };
+    }
+
+    function toTag(res: TagResponse): Tag {
+        return { name: res.tag, id: res.id };
+    }
+
     return {
-        tags: data?.tags ?? [],
-        comments: data?.comments ?? [],
+        tags: (data?.tags ?? []).map(toTag),
+        comments: (data?.comments ?? []).map(toComment),
         isLoading,
     };
 }

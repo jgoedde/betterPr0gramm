@@ -11,6 +11,7 @@ import { useVoting } from "@/components/feed/player/useVoting.ts";
 import { cn } from "@/lib/utils";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
+import { DrawerTrigger } from "@/components/ui/drawer.tsx";
 
 type Props = {
     uploadId: number;
@@ -122,13 +123,15 @@ export const SideBar: FC<Props> = ({
                 </div>
             </div>
             <div className={"flex flex-col items-center justify-center"}>
-                <MessageSquareMore size={33} />
+                <DrawerTrigger>
+                    <MessageSquareMore size={33} />
 
-                {loading ? (
-                    <Skeleton className={"h-2 w-4"} />
-                ) : (
-                    <span>{commentResponses.length}</span>
-                )}
+                    {loading ? (
+                        <Skeleton className={"h-2 w-4"} />
+                    ) : (
+                        <span>{commentResponses.length}</span>
+                    )}
+                </DrawerTrigger>
             </div>
 
             <div className={"flex flex-col items-center justify-center"}>

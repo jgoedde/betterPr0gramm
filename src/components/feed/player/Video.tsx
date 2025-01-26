@@ -4,6 +4,13 @@ import { FC, useEffect, useRef } from "react";
 import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
 import { SideBar } from "@/components/feed/player/SideBar.tsx";
 import { useVideoControls } from "@/components/feed/player/use-video-controls.ts";
+import {
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+} from "@/components/ui/drawer.tsx";
+import { CommentSection } from "../comments/CommentSection";
 
 type Props = { upload: Upload; currentVideoId: number };
 
@@ -29,9 +36,17 @@ export const Video: FC<Props> = ({ upload, currentVideoId }) => {
     }, [currentVideoId, pause, resume, upload.id]);
 
     return (
-        <>
+        <Drawer>
+            <DrawerContent className={"h-4/6 text-foreground"}>
+                <DrawerHeader>
+                    <DrawerTitle>{comments.length} Kommentare</DrawerTitle>
+                </DrawerHeader>
+                <div className={"p-3 overflow-x-scroll overflow-y-scroll"}>
+                    <CommentSection comments={comments} />
+                </div>
+            </DrawerContent>
             <BottomBar
-                tags={tags.map((tr) => ({ name: tr.tag, id: tr.id }))}
+                tags={tags}
                 loading={isLoading}
                 uploader={upload.uploaderName}
             />
@@ -64,6 +79,6 @@ export const Video: FC<Props> = ({ upload, currentVideoId }) => {
                     <source src={upload.src} />
                 </video>
             </div>
-        </>
+        </Drawer>
     );
 };
