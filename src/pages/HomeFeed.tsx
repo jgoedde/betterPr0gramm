@@ -13,24 +13,38 @@ import {
     SearchPopoverForm,
 } from "@/components/SearchPopoverForm.tsx";
 import { SearchPopoverButton } from "@/components/SearchPopoverButton.tsx";
+import { cn } from "@/lib/utils.ts";
+import { usePreferences } from "@/components/feed/use-preferences.ts";
+import { Spinner } from "@/components/ui/spinner.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
     const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const { videos, setAsSeen, loadMore } = useDoomscroll(currentSlide);
+    const { preferences, setFeed } = usePreferences();
+    const { videos, loadMore, isLoading } = useDoomscroll(
+        currentSlide,
+        preferences
+    );
     const [searchOptions, setSearchOptions] = useState<SearchOptions>({
         minimumBenis: 0,
         text: "",
         excludedText: "",
     });
 
+    useEffect(() => {
+        if (!api) {
+            return;
+        }
+
+        api.scrollTo(0);
+    }, [api, preferences.feed]);
+
     /**
      * A slide animation was fulfilled. Either we jumped to the next or previous video.
      */
     const onSettle = useCallback(() => {
-        setAsSeen(currentSlide);
         loadMore();
-    }, [currentSlide, loadMore, setAsSeen]);
+    }, [loadMore]);
 
     const onSelect = useCallback(() => {
         if (!api) {
@@ -58,7 +72,7 @@ export function HomeFeed() {
     const applyFilters = useCallback(() => {}, []);
 
     return (
-        <Popover
+        <Popover // TODO: Replace with drawer?
             onOpenChange={(isOpen) => {
                 if (!isOpen) {
                     applyFilters();
@@ -97,6 +111,37 @@ export function HomeFeed() {
                     }
                 >
                     <SearchPopoverButton />
+                </div>
+                {isLoading && videos.length === 0 && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <Spinner />
+                    </div>
+                )}
+                <div
+                    className={
+                        "absolute top-2 left-1/2 text-white -translate-x-1/2"
+                    }
+                >
+                    <div className={"flex flex-row gap-5 text-lg"}>
+                        <button
+                            className={cn(
+                                preferences.feed === "beliebt" && "underline",
+                                "underline-offset-4"
+                            )}
+                            onClick={() => setFeed("beliebt")}
+                        >
+                            Beliebt
+                        </button>
+                        <button
+                            className={cn(
+                                preferences.feed === "neu" && "underline",
+                                "underline-offset-4"
+                            )}
+                            onClick={() => setFeed("neu")}
+                        >
+                            Neu
+                        </button>
+                    </div>
                 </div>
             </div>
         </Popover>

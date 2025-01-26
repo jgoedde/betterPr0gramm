@@ -1,7 +1,6 @@
 import { Upload } from "@/components/feed/Upload.ts";
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Tag } from "@/components/feed/player/Tag.tsx";
+import { FC, useEffect, useRef } from "react";
 import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
 import { SideBar } from "@/components/feed/player/SideBar.tsx";
 import { useVideoControls } from "@/components/feed/player/use-video-controls.ts";
@@ -12,36 +11,9 @@ export const DEFAULT_TAGS_SHOWN_COUNT = 2;
 
 export const Video: FC<Props> = ({ upload, currentVideoId }) => {
     const { tags, isLoading, comments } = useUploadInfo(upload.id);
-    const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const { resume, mute, unMute, isMuted, pause, isPlaying } =
         useVideoControls(videoRef);
-
-    const [truncate, setTruncate] = useState<"truncate" | "">("");
-
-    const topTag = useMemo(() => {
-        const tag = tags[0]?.tag;
-        if (tag == null) {
-            return undefined;
-        }
-        return tag;
-    }, [tags]);
-
-    const toTag = useCallback(
-        (res: (typeof tags)[0]): Tag => ({ name: res.tag, id: res.id }),
-        []
-    );
-
-    const otherTags = useMemo<Tag[]>(() => {
-        if (shouldShowAllTags) {
-            return tags.filter((t) => t.tag !== topTag).map(toTag);
-        }
-
-        return tags
-            .filter((t) => t.tag !== topTag)
-            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT)
-            .map(toTag);
-    }, [shouldShowAllTags, tags, toTag, topTag]);
 
     // This hook is responsible for pausing the video that we just swiped away and play the new one.
     useEffect(() => {
@@ -56,26 +28,11 @@ export const Video: FC<Props> = ({ upload, currentVideoId }) => {
         }
     }, [currentVideoId, pause, resume, upload.id]);
 
-    // Gross...
-    useEffect(() => {
-        if (!shouldShowAllTags) {
-            setTimeout(() => {
-                setTruncate("truncate");
-            }, 1000);
-        } else {
-            setTruncate("");
-        }
-    }, [shouldShowAllTags]);
-
     return (
         <>
             <BottomBar
-                shouldShowAllTags={shouldShowAllTags}
-                setShouldShowAllTags={setShouldShowAllTags}
+                tags={tags.map((tr) => ({ name: tr.tag, id: tr.id }))}
                 loading={isLoading}
-                topTag={topTag}
-                inputs={truncate}
-                tags={otherTags}
             />
 
             <SideBar

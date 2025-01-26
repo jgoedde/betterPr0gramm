@@ -1,8 +1,9 @@
 import { Upload } from "@/components/feed/Upload.ts";
 import { useCallback, useEffect, useState } from "react";
-import { BASE_URL } from "@/api/pr0grammApi.ts";
 import useSWR, { Fetcher } from "swr";
 import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
+import { FeedPreferences } from "@/components/feed/use-preferences.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 
 type ItemResponse = {
     id: number;
@@ -19,11 +20,26 @@ type GetPostsResponse = {
 
 const TAKE_VIDEOS = 3;
 
-const fetcher: Fetcher<
-    GetPostsResponse,
-    [string, Cookies | undefined]
-> = async ([url, cookies]) => {
-    const response = await fetch(url, {
+type CacheKey = {
+    contentType: number;
+    feed: "beliebt" | "neu";
+    baseUrl: string;
+    cookies: Cookies | undefined;
+};
+
+const fetcher: Fetcher<GetPostsResponse, CacheKey> = async ({
+    contentType,
+    baseUrl,
+    cookies,
+    feed,
+}) => {
+    const urlSearchParams = new URLSearchParams({
+        flags: String(contentType),
+        ...(feed === "beliebt" && { promoted: "1" }),
+        showJunk: String(false),
+    });
+
+    const response = await fetch(`${baseUrl}?${urlSearchParams.toString()}`, {
         method: "GET",
         headers: {
             ...buildCookiesHeader(cookies),
@@ -33,17 +49,31 @@ const fetcher: Fetcher<
     return (await response.json()) as GetPostsResponse;
 };
 
-export function useDoomscroll(currentIndex: number) {
-    const [seen, setSeen] = useState<{ postId: number; timestamp: Date }[]>([]);
+export function useDoomscroll(
+    currentIndex: number,
+    feedPreferences: FeedPreferences
+) {
     const [videos, setVideos] = useState<Upload[]>([]);
     const [feed, setFeed] = useState<Upload[]>([]);
 
     const cookies = useAuth().cookies;
 
-    /* only while developing */
-    const { data } = useSWR(
-        ["neu", `${BASE_URL}/api/items/get?flags=1`, cookies],
-        ([, url]) => fetcher([url, cookies])
+    /**
+     * Clear everything on Neu/Beliebt switch
+     */
+    useEffect(() => {
+        setVideos([]);
+        setFeed([]);
+    }, [feedPreferences.feed]);
+
+    const { data, isLoading } = useSWR(
+        () => ({
+            contentType: feedPreferences.contentType,
+            feed: feedPreferences.feed,
+            baseUrl: `${BASE_URL}/api/items/get`,
+            cookies,
+        }),
+        fetcher
     );
 
     useEffect(() => {
@@ -95,20 +125,6 @@ export function useDoomscroll(currentIndex: number) {
         };
     }
 
-    const setAsSeen = useCallback(
-        (videoId: number) => {
-            if (seen.find((x) => x.postId === videoId)) {
-                return;
-            }
-
-            setSeen((prev) => [
-                ...prev,
-                { postId: videoId, timestamp: new Date() },
-            ]);
-        },
-        [seen]
-    );
-
     const loadMore = useCallback(() => {
         setFeed((prev) =>
             [
@@ -118,7 +134,7 @@ export function useDoomscroll(currentIndex: number) {
         );
     }, [currentIndex, videos]);
 
-    return { videos: feed, setAsSeen, loadMore };
+    return { videos: feed, loadMore, isLoading };
 }
 
 function onlyUnique<T>(value: T, index: number, array: T[]) {

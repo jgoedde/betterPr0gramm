@@ -4,7 +4,10 @@ import { useLocalStorage } from "react-use";
 type Voting = Record<number, "up" | "down" | "none">;
 
 export function useVoting() {
-    const [voting, setVoting] = useLocalStorage<Voting>("pr0gramm-votes", {});
+    const [voting, setVoting] = useLocalStorage<Voting>(
+        "betterPr0gramm-votes",
+        {}
+    );
 
     const isUp = useCallback(
         (uploadId: number) => {

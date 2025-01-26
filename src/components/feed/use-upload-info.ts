@@ -23,7 +23,6 @@ const fetcher: Fetcher<
 > = async ([url, cookies]) => {
     console.log("trying to cache " + url);
 
-    /*
     return await new Promise<GetInfoResponse>((res) => {
         setTimeout(
             () =>
@@ -41,9 +40,7 @@ const fetcher: Fetcher<
         );
     });
 
-
-     */
-
+    /*
     const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -56,6 +53,8 @@ const fetcher: Fetcher<
     });
 
     return (await response.json()) as GetInfoResponse;
+
+     */
 };
 
 export function useUploadInfo(uploadId: number) {

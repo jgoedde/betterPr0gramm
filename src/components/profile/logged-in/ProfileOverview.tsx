@@ -22,9 +22,6 @@ export const ProfileOverview: FC = () => {
 
     const { isLoading, data } = useProfileInfo(nickname);
 
-    console.log(isLoading, "isLoading");
-    console.log(data, "data");
-
     return (
         <div className={"flex flex-col h-full"}>
             <div className={"w-full text-center text-xl font-bold py-2"}>

@@ -3,26 +3,46 @@ import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { TagButton } from "@/components/feed/player/TagButton.tsx";
 import { DEFAULT_TAGS_SHOWN_COUNT } from "@/components/feed/player/Video.tsx";
-import * as React from "react";
-import { FC } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 
 type Props = {
-    shouldShowAllTags: boolean;
     loading: boolean;
-    topTag: undefined | string;
-    inputs: "truncate" | "";
     tags: Tag[];
-    setShouldShowAllTags: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const BottomBar: FC<Props> = ({
-    inputs,
-    loading,
-    setShouldShowAllTags,
-    shouldShowAllTags,
-    tags,
-    topTag,
-}) => {
+export const BottomBar: FC<Props> = ({ loading, tags }) => {
+    const [shouldShowAllTags, setShouldShowAllTags] = useState(false);
+    const [truncate, setTruncate] = useState<"truncate" | "">("");
+
+    const topTag = useMemo(() => {
+        const tag = tags[0]?.name;
+        if (tag == null) {
+            return undefined;
+        }
+        return tag;
+    }, [tags]);
+
+    const otherTags = useMemo<Tag[]>(() => {
+        if (shouldShowAllTags) {
+            return tags.filter((t) => t.name !== topTag);
+        }
+
+        return tags
+            .filter((t) => t.name !== topTag)
+            .filter((_, i) => i <= DEFAULT_TAGS_SHOWN_COUNT);
+    }, [shouldShowAllTags, tags, topTag]);
+
+    // Gross...
+    useEffect(() => {
+        if (!shouldShowAllTags) {
+            setTimeout(() => {
+                setTruncate("truncate");
+            }, 1000);
+        } else {
+            setTruncate("");
+        }
+    }, [shouldShowAllTags]);
+
     return (
         <div
             className={"absolute bottom-0 left-0 w-full p-2 z-10"}
@@ -52,13 +72,13 @@ export const BottomBar: FC<Props> = ({
                 <div
                     className={cn(
                         "transition-all ease-in-out duration-1000",
-                        inputs,
+                        truncate,
                         shouldShowAllTags
                             ? "max-h-[200px] overflow-y-scroll"
                             : "max-h-6"
                     )}
                 >
-                    {tags.map((t) => (
+                    {otherTags.map((t) => (
                         <span key={t.id}>
                             <TagButton tag={t.name} id={t.id} />
                             {" • "}
@@ -66,16 +86,17 @@ export const BottomBar: FC<Props> = ({
                     ))}
                 </div>
                 <div className="flex w-full justify-end">
-                    {!loading && tags.length > DEFAULT_TAGS_SHOWN_COUNT && (
-                        <span
-                            className={"text-white text-opacity-75"}
-                            onClick={() =>
-                                setShouldShowAllTags((prev) => !prev)
-                            }
-                        >
-                            {shouldShowAllTags ? "Weniger" : "Mehr"}
-                        </span>
-                    )}
+                    {!loading &&
+                        otherTags.length > DEFAULT_TAGS_SHOWN_COUNT && (
+                            <span
+                                className={"text-white text-opacity-75"}
+                                onClick={() =>
+                                    setShouldShowAllTags((prev) => !prev)
+                                }
+                            >
+                                {shouldShowAllTags ? "Weniger" : "Mehr"}
+                            </span>
+                        )}
                 </div>
             </div>
         </div>
