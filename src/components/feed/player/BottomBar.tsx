@@ -47,13 +47,15 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                     ) : (
                         <>
                             <div className="font-bold text-lg">{topTag}</div>
-                            <div className="">von {uploader}</div>
+                            <div className="text-white text-opacity-70">
+                                von {uploader}
+                            </div>
                         </>
                     )}
                 </div>
                 <div
                     className={cn(
-                        "overflow-x-auto flex flex-wrap flex-col h-8 space-x-2 justify-center"
+                        "w-full overflow-x-auto flex whitespace-nowrap space-x-2"
                     )}
                 >
                     {otherTags.map((t) => (
