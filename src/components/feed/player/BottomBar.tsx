@@ -2,7 +2,13 @@ import { Tag } from "@/components/feed/player/Tag.ts";
 import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { FC, useMemo } from "react";
-import { Badge } from "@/components/ui/badge.tsx";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover.tsx";
+import { badgeVariants } from "@/components/ui/badge.tsx";
+import { MinusIcon, PlusIcon } from "lucide-react";
 
 type Props = {
     loading: boolean;
@@ -47,13 +53,38 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                 </div>
                 <div
                     className={cn(
-                        "overflow-x-auto flex flex-wrap flex-col h-8 space-x-2"
+                        "overflow-x-auto flex flex-wrap flex-col h-8 space-x-2 justify-center"
                     )}
                 >
                     {otherTags.map((t) => (
-                        <Badge key={"tag-" + t.id} variant={"secondary"}>
-                            {t.name}
-                        </Badge>
+                        <Popover key={`popover-tag-${t.id}`}>
+                            <PopoverTrigger asChild>
+                                <div
+                                    className={badgeVariants({
+                                        variant: "default",
+                                        className:
+                                            "border-orange-600 bg-secondary text-white hover:bg-orange-600",
+                                    })}
+                                >
+                                    {t.name}
+                                </div>
+                            </PopoverTrigger>
+                            <PopoverContent
+                                side={"top"}
+                                className={"w-20 relative"}
+                            >
+                                <PlusIcon
+                                    className={
+                                        "absolute left-0 -translate-y-1/2 translate-x-1/2"
+                                    }
+                                />
+                                <MinusIcon
+                                    className={
+                                        "absolute right-0 -translate-y-1/2 -translate-x-1/2"
+                                    }
+                                />
+                            </PopoverContent>
+                        </Popover>
                     ))}
                 </div>
             </div>
