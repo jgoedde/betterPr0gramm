@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from "react";
+import { FC, useCallback, useEffect, useRef } from "react";
 import { useVideoControls } from "@/components/feed/player/use-video-controls.tsx";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 
@@ -8,8 +8,9 @@ export const Video: FC<{
     currentUploadId: number;
 }> = ({ src, uploadId, currentUploadId }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const blurredVideoRef = useRef<HTMLVideoElement>(null);
     const { resume, mute, unMute, isMuted, pause, isPlaying } =
-        useVideoControls(videoRef);
+        useVideoControls({ videoRef, blurredVideoRef });
 
     const { shouldPlayAudio } = usePlaybackContext();
 
@@ -39,23 +40,38 @@ export const Video: FC<{
         }
     }, [currentUploadId, pause, resume, uploadId]);
 
+    const onVideoClick = useCallback(() => {
+        if (isPlaying) {
+            pause();
+        } else {
+            void resume();
+        }
+    }, [isPlaying, pause, resume]);
+
     return (
-        <video
-            ref={videoRef}
-            className="w-full h-full max-w-full max-h-full object-contain"
-            autoPlay
-            loop
-            muted={!shouldPlayAudio}
-            playsInline
-            onClick={() => {
-                if (isPlaying) {
-                    pause();
-                } else {
-                    void resume();
-                }
-            }}
-        >
-            <source src={src} />
-        </video>
+        <>
+            <video
+                ref={videoRef}
+                className="w-full h-full max-w-full max-h-full object-contain"
+                autoPlay
+                loop
+                muted={!shouldPlayAudio}
+                playsInline
+                onClick={onVideoClick}
+            >
+                <source src={src} />
+            </video>
+            <video
+                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 -z-10"
+                autoPlay
+                loop
+                ref={blurredVideoRef}
+                muted
+                playsInline
+                onClick={onVideoClick}
+            >
+                <source src={src} />
+            </video>
+        </>
     );
 };
