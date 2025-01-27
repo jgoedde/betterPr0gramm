@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils.ts";
-import { ListVideo, User } from "lucide-react";
+import { Home, User } from "lucide-react";
 import { useNavigation } from "@/hooks/use-navigation.tsx";
 
 export function BottomNavigation() {
@@ -8,46 +8,38 @@ export function BottomNavigation() {
     return (
         <div
             className={cn(
-                "z-50 w-full h-full basis-1/12",
-                view === "home"
-                    ? "bg-home-background text-home-color"
-                    : "bg-background text-foreground"
+                "w-full flex-none h-14 bg-home-background border-t border-white border-opacity-30"
             )}
         >
-            <div className="grid justify-center h-full max-w-lg grid-cols-2 mx-auto p-2 text-foreground">
-                <div
-                    className={cn(
-                        `flex w-3/4 mx-auto justify-center h-full`,
-                        view === "home" &&
-                            "rounded-2xl bg-foreground bg-opacity-25 text-background"
-                    )}
-                >
+            <div className="grid justify-center h-full max-w-lg grid-cols-2 mx-auto">
+                <div className={"flex w-3/4 mx-auto justify-center h-full"}>
                     <button
                         type="button"
                         onClick={() => goTo("home")}
-                        className="inline-flex flex-col items-center justify-center font-medium p-1 group"
+                        className={cn(
+                            "inline-flex flex-col items-center justify-center font-medium p-1 group",
+                            view === "home"
+                                ? "text-white"
+                                : "text-white text-opacity-50"
+                        )}
                     >
-                        <ListVideo className={"w-5 h-5 mb-1"} />
+                        <Home className={"w-7 h-7"} />
                         <span className="text-sm">Feed</span>
                     </button>
                 </div>
-                <div
-                    className={cn(
-                        `flex w-3/4 mx-auto justify-center h-full`,
-                        view === "profile" &&
-                            "rounded-2xl bg-foreground bg-opacity-25 text-background",
-                        view === "home" && "text-white"
-                    )}
-                >
+                <div className={"flex w-3/4 mx-auto justify-center h-full"}>
                     <button
                         type="button"
                         onClick={() => goTo("profile")}
-                        className="inline-flex flex-col items-center justify-center font-medium p-1 group"
+                        className={cn(
+                            "inline-flex flex-col items-center justify-center font-medium p-1 group",
+                            view === "profile"
+                                ? "text-white"
+                                : "text-white text-opacity-50"
+                        )}
                     >
-                        <User className={"w-5 h-5 mb-1"} />
-                        <span className="text-sm max-w-28 truncate">
-                            Profil
-                        </span>
+                        <User className={"w-7 h-7"} />
+                        <span className="text-sm">Profil</span>
                     </button>
                 </div>
             </div>

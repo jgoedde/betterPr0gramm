@@ -7,7 +7,7 @@ export const ContentWrapper = () => {
     const { view } = useNavigation();
 
     return (
-        <div className="basis-11/12">
+        <div className="grow">
             {view === "home" && (
                 <div className={"bg-home-background text-home-color h-full"}>
                     <PlaybackProvider>
