@@ -1,5 +1,5 @@
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
 import { SideBar } from "@/components/feed/player/SideBar.tsx";
 import {
@@ -8,26 +8,19 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer.tsx";
-import { CommentSection } from "../comments/CommentSection";
 import { FeedItem } from "../use-doomscroll";
 import { Image } from "@/components/feed/player/Image.tsx";
 import { Video } from "@/components/feed/player/Video.tsx";
-import { Input } from "@/components/ui/input.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Send } from "lucide-react";
-import { useToast } from "@/hooks/use-toast.ts";
+import { CommentsDrawerContent } from "@/components/feed/comments/CommentsDrawerContent.tsx";
+import { CommentsContextProvider } from "@/contexts/comments/CommentsContextProvider.tsx";
 
 type Props = {
     upload: FeedItem;
     currentUploadId: number;
 };
 
-export const DEFAULT_TAGS_SHOWN_COUNT = 2;
-
 export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
-    const { tags, isLoading, comments } = useUploadInfo(upload.id);
-    const { toast } = useToast();
-    const [comment, setComment] = useState<string>("");
+    const { tags, isLoading, comments, revalidate } = useUploadInfo(upload.id);
 
     const slot = useMemo(() => {
         if (upload.type === "video") {
@@ -46,39 +39,22 @@ export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
 
     return (
         <Drawer>
-            <DrawerContent className={"h-4/6 text-foreground"}>
-                <DrawerHeader>
-                    <DrawerTitle>{comments.length} Kommentare</DrawerTitle>
-                </DrawerHeader>
-                <div className={"p-3 overflow-x-scroll overflow-y-scroll"}>
-                    <CommentSection comments={comments} />
-                </div>
-                <div className={"w-full px-4 pb-2 pt-6"}>
-                    <div className={"relative h-12"}>
-                        <Input
-                            className={"h-full"}
-                            value={comment}
-                            onChange={(e) => {
-                                setComment(e.target.value);
-                            }}
-                            placeholder={"Kommentar hinzufügen ..."}
+            <DrawerContent className={"h-5/6 text-foreground"}>
+                <CommentsContextProvider comments={comments}>
+                    <DrawerHeader>
+                        <DrawerTitle>{comments.length} Kommentare</DrawerTitle>
+                    </DrawerHeader>
+                    <div
+                        className={
+                            "flex flex-col justify-between h-[calc(100%-60px)]"
+                        }
+                    >
+                        <CommentsDrawerContent
+                            uploadId={upload.id}
+                            revalidate={revalidate}
                         />
-                        {comment !== "" && (
-                            <Button
-                                size={"icon"}
-                                onClick={() => {
-                                    toast({
-                                        title: "Not implemented :(",
-                                    });
-                                }}
-                                variant={"ghost"}
-                                className={"absolute right-0 top-0 h-full w-12"}
-                            >
-                                <Send />
-                            </Button>
-                        )}
                     </div>
-                </div>
+                </CommentsContextProvider>
             </DrawerContent>
             <BottomBar
                 tags={tags}

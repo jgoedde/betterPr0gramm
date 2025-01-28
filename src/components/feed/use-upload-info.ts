@@ -63,7 +63,7 @@ const fetcher: Fetcher<
 export function useUploadInfo(uploadId: number) {
     const cookies = useAuth().cookies;
 
-    const { data, isLoading } = useSWRImmutable(
+    const { data, isLoading, mutate } = useSWRImmutable(
         [`${BASE_URL}/api/items/info?itemId=${uploadId}`, cookies],
         fetcher
     );
@@ -88,5 +88,6 @@ export function useUploadInfo(uploadId: number) {
         tags: (data?.tags ?? []).map(toTag),
         comments: (data?.comments ?? []).map(toComment),
         isLoading,
+        revalidate: () => mutate(),
     };
 }
