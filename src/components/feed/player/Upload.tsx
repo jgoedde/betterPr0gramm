@@ -13,6 +13,8 @@ import { Image } from "@/components/feed/player/Image.tsx";
 import { Video } from "@/components/feed/player/Video.tsx";
 import { CommentsDrawerContent } from "@/components/feed/comments/CommentsDrawerContent.tsx";
 import { CommentsContextProvider } from "@/contexts/comments/CommentsContextProvider.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { CommentsLoadingSkeletons } from "@/components/feed/player/CommentsLoadingSkeletons.tsx";
 
 type Props = {
     upload: FeedItem;
@@ -42,18 +44,25 @@ export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
             <DrawerContent className={"h-5/6 text-foreground"}>
                 <CommentsContextProvider comments={comments}>
                     <DrawerHeader>
-                        <DrawerTitle>{comments.length} Kommentare</DrawerTitle>
+                        <DrawerTitle>
+                            {isLoading ? (
+                                <Skeleton
+                                    className={"justify-self-center w-36 h-3"}
+                                />
+                            ) : (
+                                <span>{comments.length} Kommentare</span>
+                            )}
+                        </DrawerTitle>
                     </DrawerHeader>
-                    <div
-                        className={
-                            "flex flex-col justify-between h-[calc(100%-60px)]"
-                        }
-                    >
+
+                    {isLoading ? (
+                        <CommentsLoadingSkeletons />
+                    ) : (
                         <CommentsDrawerContent
                             uploadId={upload.id}
                             revalidate={revalidate}
                         />
-                    </div>
+                    )}
                 </CommentsContextProvider>
             </DrawerContent>
             <BottomBar

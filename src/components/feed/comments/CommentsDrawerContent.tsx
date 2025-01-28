@@ -54,12 +54,12 @@ export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
             },
             body: new URLSearchParams({
                 itemId: String(uploadId),
-                parent: String(0),
+                parent: String(highlightedCommentId ?? 0),
                 comment,
             }).toString(),
         });
         revalidate();
-    }, [comment, cookies, revalidate, uploadId]);
+    }, [comment, cookies, highlightedCommentId, revalidate, uploadId]);
 
     const placeholderText = useMemo(() => {
         const recipientName = comments.find(
@@ -74,8 +74,8 @@ export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
     }, [comments, highlightedCommentId]);
 
     return (
-        <>
-            <div className={"py-3 px-4 overflow-x-scroll overflow-y-scroll"}>
+        <div className={"flex flex-col justify-between h-[calc(100%-60px)]"}>
+            <div className={"p-4 overflow-x-scroll overflow-y-scroll"}>
                 <CommentSection />
             </div>
             <div className={"w-full p-3 max-h-36 flex flex-col-reverse"}>
@@ -106,6 +106,6 @@ export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
                     placeholder={placeholderText}
                 />
             </div>
-        </>
+        </div>
     );
 };
