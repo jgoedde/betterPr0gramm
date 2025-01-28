@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import { useLocalStorage } from "react-use";
 
-type Voting = Record<number, "up" | "down" | "none">;
+type VoteMap = Record<number, "up" | "down" | "none">;
 
-export function useVoting() {
-    const [voting, setVoting] = useLocalStorage<Voting>(
+export function useVote() {
+    const [voting, setVoting] = useLocalStorage<VoteMap>(
         "betterPr0gramm-votes",
         {}
     );

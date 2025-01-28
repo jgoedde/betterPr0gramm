@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { FC, useCallback, useMemo, useState } from "react";
-import { useVoting } from "@/components/feed/player/useVoting.ts";
-import { cn } from "@/lib/utils";
+import { useVote } from "@/components/feed/player/use-vote.ts";
+import { cn } from "@/lib/utils.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
@@ -32,7 +32,7 @@ export const SideBar: FC<Props> = ({
     uploadType,
 }) => {
     const [benisTmp, setBenisTmp] = useState<number>(benis);
-    const { isUp, downvote, upvote, revokeVote, isDown } = useVoting();
+    const { isUp, downvote, upvote, revokeVote, isDown } = useVote();
     const { cookies } = useAuth();
     const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
 

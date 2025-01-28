@@ -1,6 +1,6 @@
 import { FC, ReactNode, useMemo, useState } from "react";
 import { Comment } from "@/components/feed/comments/Comment.ts";
-import { CommentsContext } from "./CommentsContext";
+import { CommentsContext } from "./CommentsContext.ts";
 
 export const CommentsContextProvider: FC<{
     children: ReactNode;

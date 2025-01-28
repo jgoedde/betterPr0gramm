@@ -1,7 +1,7 @@
 import { HomeFeed } from "@/pages/HomeFeed.tsx";
 import { ProfilePage } from "@/pages/ProfilePage.tsx";
-import { useNavigation } from "@/hooks/use-navigation.tsx";
-import { PlaybackProvider } from "@/contexts/playback/PlaybackProvider.tsx";
+import { useNavigation } from "@/hooks/use-navigation.ts";
+import { PlaybackProvider } from "@/components/feed/player/video/playback-context/PlaybackProvider.tsx";
 
 export const ContentWrapper = () => {
     const { view } = useNavigation();

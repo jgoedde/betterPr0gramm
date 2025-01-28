@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { PlaybackContext } from "@/contexts/playback/PlaybackContext.ts";
+import { PlaybackContext } from "@/components/feed/player/video/playback-context/PlaybackContext.ts";
 
 export function usePlaybackContext() {
     const context = useContext(PlaybackContext);

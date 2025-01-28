@@ -1,37 +1,42 @@
 import { FC, useCallback, useMemo } from "react";
 import { Comment } from "@/components/feed/comments/Comment.ts";
-import { Thread } from "@/components/feed/comments/Thread.ts";
+import { Thread } from "@/components/feed/comments/threads/Thread.ts";
 import { cn } from "@/lib/utils.ts";
 import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
-import { Panel } from "@/components/feed/comments/Expandable.tsx";
+import { Panel } from "@/components/feed/comments/threads/Expandable.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Heart, ThumbsDown } from "lucide-react";
-import { useComments } from "@/contexts/comments/CommentsContext.ts";
+import { useComments } from "@/components/feed/comments/context/CommentsContext.ts";
 
 type Props = {
     comment: Comment;
     replies: Thread[];
-    level: number;
-    expandedComments: number[];
+    depth: number;
+
+    /**
+     * A list of comment IDs that are expanded in the UI.
+     */
+    expandedReplies: number[];
+
     setExpandedComments: (
         value: ((prevState: number[]) => number[]) | number[]
     ) => void;
 };
 
-export const CommentItem: FC<Props> = ({
+export const ThreadItem: FC<Props> = ({
     comment,
     replies,
-    level,
-    expandedComments,
+    depth,
+    expandedReplies,
     setExpandedComments,
 }) => {
     const { setHighlightedCommentId, highlightedCommentId } = useComments();
     const hasParent = comment.parent != 0;
 
     const isExpanded = useMemo(() => {
-        return expandedComments.includes(comment.id) || level >= 1;
-    }, [comment.id, expandedComments, level]);
+        return expandedReplies.includes(comment.id) || depth >= 1;
+    }, [comment.id, expandedReplies, depth]);
 
     const expand = useCallback(() => {
         setExpandedComments((prev) => [...prev, comment.id]);
@@ -95,22 +100,22 @@ export const CommentItem: FC<Props> = ({
             </div>
             {replies.length > 0 && (
                 <>
-                    {!isExpanded && level === 0 && (
+                    {!isExpanded && depth === 0 && (
                         <Panel onClick={expand} text={"Mehr anzeigen"} />
                     )}
                     {isExpanded && (
                         <div className="mt-4">
                             {replies.map((reply) => (
-                                <CommentItem
+                                <ThreadItem
                                     key={reply.comment.id}
                                     comment={reply.comment}
                                     replies={reply.replies}
-                                    level={level + 1}
-                                    expandedComments={expandedComments}
+                                    depth={depth + 1}
+                                    expandedReplies={expandedReplies}
                                     setExpandedComments={setExpandedComments}
                                 />
                             ))}
-                            {level === 0 && (
+                            {depth === 0 && (
                                 <Panel onClick={collapse} text={"Verbergen"} />
                             )}
                         </div>

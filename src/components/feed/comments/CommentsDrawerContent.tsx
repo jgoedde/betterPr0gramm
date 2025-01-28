@@ -1,12 +1,12 @@
 import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
-import { CommentSection } from "@/components/feed/comments/CommentSection.tsx";
+import { ThreadList } from "@/components/feed/comments/threads/ThreadList.tsx";
 import { Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { isEmpty } from "lodash";
 import { cn } from "@/lib/utils.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
-import { useComments } from "@/contexts/comments/CommentsContext.ts";
+import { useComments } from "@/components/feed/comments/context/CommentsContext.ts";
 
 const DEFAULT_NEW_COMMENT_PLACEHOLDER = "Kommentar hinzufügen ...";
 const REPLY_TO_COMMENT_PLACEHOLDER = "Antwort auf {0}";
@@ -76,7 +76,7 @@ export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
     return (
         <div className={"flex flex-col justify-between h-[calc(100%-60px)]"}>
             <div className={"p-4 overflow-x-scroll overflow-y-scroll"}>
-                <CommentSection />
+                <ThreadList />
             </div>
             <div className={"w-full p-3 max-h-36 flex flex-col-reverse"}>
                 {!isEmpty(comment) && (

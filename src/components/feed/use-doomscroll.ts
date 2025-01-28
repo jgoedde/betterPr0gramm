@@ -119,7 +119,7 @@ export function useDoomscroll(
 
     const next = useMemo(() => {
         return uploads
-            .slice(currentIndex, currentIndex + TAKE_POSTS)
+            .slice(currentIndex, currentIndex + TAKE_POSTS + 1)
             .map(buildFeedItem);
     }, [currentIndex, uploads]);
 

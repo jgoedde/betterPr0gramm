@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils.ts";
 import { Home, User } from "lucide-react";
-import { useNavigation } from "@/hooks/use-navigation.tsx";
+import { useNavigation } from "@/hooks/use-navigation.ts";
 
 export function BottomNavigation() {
     const { view, goTo } = useNavigation();

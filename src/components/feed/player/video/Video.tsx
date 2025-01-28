@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useRef } from "react";
-import { useVideoControls } from "@/components/feed/player/use-video-controls.tsx";
+import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 
 export const Video: FC<{

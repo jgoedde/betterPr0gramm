@@ -1,12 +1,12 @@
 import { FC, useCallback, useMemo, useState } from "react";
 import { Comment } from "@/components/feed/comments/Comment.ts";
-import { CommentItem } from "@/components/feed/comments/CommentItem.tsx";
-import { Thread } from "@/components/feed/comments/Thread.ts";
-import { useComments } from "@/contexts/comments/CommentsContext.ts";
+import { ThreadItem } from "@/components/feed/comments/threads/ThreadItem.tsx";
+import { Thread } from "@/components/feed/comments/threads/Thread.ts";
+import { useComments } from "@/components/feed/comments/context/CommentsContext.ts";
 
 type TBuildThreads = (comments: Comment[], parentId?: number) => Thread[];
 
-export const CommentSection: FC = () => {
+export const ThreadList: FC = () => {
     const { comments } = useComments();
     const [expandedComments, setExpandedComments] = useState<number[]>([]);
 
@@ -28,12 +28,12 @@ export const CommentSection: FC = () => {
     );
 
     return threads.map(({ comment, replies }) => (
-        <CommentItem
+        <ThreadItem
             key={comment.id}
             comment={comment}
             replies={replies}
-            level={0}
-            expandedComments={expandedComments}
+            depth={0}
+            expandedReplies={expandedComments}
             setExpandedComments={setExpandedComments}
         />
     ));

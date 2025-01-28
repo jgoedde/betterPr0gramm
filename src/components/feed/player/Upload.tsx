@@ -1,7 +1,7 @@
 import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 import { FC, useMemo } from "react";
-import { BottomBar } from "@/components/feed/player/BottomBar.tsx";
-import { SideBar } from "@/components/feed/player/SideBar.tsx";
+import { BottomBar } from "@/components/feed/player/overlay/BottomBar.tsx";
+import { SideBar } from "@/components/feed/player/overlay/SideBar.tsx";
 import {
     Drawer,
     DrawerContent,
@@ -9,12 +9,12 @@ import {
     DrawerTitle,
 } from "@/components/ui/drawer.tsx";
 import { FeedItem } from "../use-doomscroll";
-import { Image } from "@/components/feed/player/Image.tsx";
-import { Video } from "@/components/feed/player/Video.tsx";
+import { Image } from "@/components/feed/player/image/Image.tsx";
+import { Video } from "@/components/feed/player/video/Video.tsx";
 import { CommentsDrawerContent } from "@/components/feed/comments/CommentsDrawerContent.tsx";
-import { CommentsContextProvider } from "@/contexts/comments/CommentsContextProvider.tsx";
+import { CommentsContextProvider } from "@/components/feed/comments/context/CommentsContextProvider.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { CommentsLoadingSkeletons } from "@/components/feed/player/CommentsLoadingSkeletons.tsx";
+import { CommentsLoadingSkeletons } from "@/components/feed/comments/CommentsLoadingSkeletons.tsx";
 
 type Props = {
     upload: FeedItem;
