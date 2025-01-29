@@ -55,15 +55,6 @@ export const SideBar: FC<Props> = ({
                     _nonce: nonce,
                 }).toString(),
             });
-
-            // console.info("Should perform fetch now, but is stubbed...");
-            // console.log(
-            //     vote,
-            //     cookies,
-            //     nonce,
-            //     uploadId,
-            //     "vote,cookies,nonce,uploadId"
-            // );
         },
         [cookies, extractNonce, isAuthenticated, uploadId]
     );

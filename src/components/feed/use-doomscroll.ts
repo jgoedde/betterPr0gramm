@@ -94,15 +94,6 @@ export function useDoomscroll(
                 return prevItems;
             }
 
-            if (prevItems.length > 0) {
-                console.info("Found new uploads! Inserting them at cursor...");
-                console.info(uniqueUploads);
-                console.log(
-                    "existing uploads before inserting new ones",
-                    prevItems
-                );
-            }
-
             const after = prevItems.slice(currentIndex + 1);
             const before = prevItems.slice(0, currentIndex + 1);
             return [...before, ...uniqueUploads, ...after];

@@ -23,8 +23,6 @@ const fetcher: Fetcher<
     GetInfoResponse,
     [string, Cookies | undefined]
 > = async ([url, cookies]) => {
-    console.log("trying to cache " + url);
-
     /*
     return await new Promise<GetInfoResponse>((res) => {
         setTimeout(

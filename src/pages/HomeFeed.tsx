@@ -58,10 +58,6 @@ export function HomeFeed() {
         };
     }, [api, onSelect, onSettle]);
 
-    useEffect(() => {
-        console.log(feed, "feed");
-    }, [feed]);
-
     return (
         <div className={"relative h-full"}>
             <Carousel
