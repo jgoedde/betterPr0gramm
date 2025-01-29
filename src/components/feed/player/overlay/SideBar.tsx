@@ -32,29 +32,28 @@ export const SideBar: FC<Props> = ({
     uploadType,
 }) => {
     const { isUp, downvote, upvote, isDown } = useVote();
-    const { cookies } = useAuth();
+    const { cookies, extractNonce, isAuthenticated } = useAuth();
     const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
-
-    const nonce = useMemo(() => {
-        if (cookies == null) {
-            return undefined;
-        }
-        return cookies.me.id.slice(0, 16);
-    }, [cookies]);
 
     const postVote = useCallback(
         (vote: 1 | 0 | -1) => {
+            if (!isAuthenticated) {
+                return;
+            }
+
+            const nonce = extractNonce();
+
             void fetch(`${BASE_URL}/api/items/vote`, {
                 method: "POST",
                 headers: {
-                    "content-type": "application/json",
+                    "content-type": "application/x-www-form-urlencoded",
                     ...buildCookiesHeader(cookies),
                 },
-                body: JSON.stringify({
-                    id: uploadId,
-                    vote,
+                body: new URLSearchParams({
+                    id: String(uploadId),
+                    vote: String(vote),
                     _nonce: nonce,
-                }),
+                }).toString(),
             });
 
             // console.info("Should perform fetch now, but is stubbed...");
@@ -66,7 +65,7 @@ export const SideBar: FC<Props> = ({
             //     "vote,cookies,nonce,uploadId"
             // );
         },
-        [cookies, nonce, uploadId]
+        [cookies, extractNonce, isAuthenticated, uploadId]
     );
 
     const benisTmp = useMemo(() => {

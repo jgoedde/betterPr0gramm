@@ -34,7 +34,7 @@ export const ThreadItem: FC<Props> = ({
     expandedReplies,
     setExpandedComments,
 }) => {
-    const { isAuthenticated, cookies } = useAuth();
+    const { isAuthenticated, cookies, extractNonce } = useAuth();
     const { setHighlightedCommentId, highlightedCommentId } = useComments();
     const {
         isUp: isItemUpvoted,
@@ -86,6 +86,12 @@ export const ThreadItem: FC<Props> = ({
 
     const postVote = useCallback(
         async (vote: -1 | 0 | 1) => {
+            if (!isAuthenticated) {
+                return;
+            }
+
+            const nonce = extractNonce();
+
             await fetch(`${BASE_URL}/api/comments/vote`, {
                 method: "POST",
                 headers: {
@@ -95,10 +101,11 @@ export const ThreadItem: FC<Props> = ({
                 body: new URLSearchParams({
                     id: String(comment.id),
                     vote: String(vote),
+                    _nonce: String(nonce),
                 }).toString(),
             });
         },
-        [comment.id, cookies]
+        [comment.id, cookies, extractNonce, isAuthenticated]
     );
 
     const onHeartClick = useCallback(() => {
