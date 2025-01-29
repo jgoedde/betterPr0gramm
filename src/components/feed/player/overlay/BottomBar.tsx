@@ -2,13 +2,7 @@ import { Tag } from "@/components/feed/player/Tag.ts";
 import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { FC, useMemo } from "react";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover.tsx";
-import { badgeVariants } from "@/components/ui/badge.tsx";
-import { MinusIcon, PlusIcon } from "lucide-react";
+import { TagPopover } from "@/components/feed/player/overlay/TagPopover.tsx";
 
 type Props = {
     loading: boolean;
@@ -59,34 +53,7 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                     )}
                 >
                     {otherTags.map((t) => (
-                        <Popover key={`popover-tag-${t.id}`}>
-                            <PopoverTrigger asChild>
-                                <div
-                                    className={badgeVariants({
-                                        variant: "default",
-                                        className:
-                                            "border-orange-600 bg-secondary text-white hover:bg-orange-600",
-                                    })}
-                                >
-                                    {t.name}
-                                </div>
-                            </PopoverTrigger>
-                            <PopoverContent
-                                side={"top"}
-                                className={"w-20 relative"}
-                            >
-                                <PlusIcon
-                                    className={
-                                        "absolute left-0 -translate-y-1/2 translate-x-1/2"
-                                    }
-                                />
-                                <MinusIcon
-                                    className={
-                                        "absolute right-0 -translate-y-1/2 -translate-x-1/2"
-                                    }
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <TagPopover key={t.id} tag={t} />
                     ))}
                 </div>
             </div>
