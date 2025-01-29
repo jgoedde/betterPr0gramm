@@ -3,7 +3,6 @@ import useSWR, { Fetcher } from "swr";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast.ts";
-import { isEmpty } from "lodash";
 
 class NotAuthenticatedError extends Error {
     constructor() {
@@ -59,9 +58,9 @@ type GetProfileResponse = {
 };
 
 export function useProfileInfo() {
-    const { cookies, deleteCookies, username } = useAuth();
+    const { cookies, deleteCookies, username, isAuthenticated } = useAuth();
     const { isLoading, data, error } = useSWR(
-        isEmpty(username)
+        !isAuthenticated
             ? null
             : [
                   `${BASE_URL}/api/profile/info?name=${username}&flags=9`,

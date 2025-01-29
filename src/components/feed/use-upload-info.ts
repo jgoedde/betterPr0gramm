@@ -61,7 +61,7 @@ const fetcher: Fetcher<
 };
 
 export function useUploadInfo(uploadId: number) {
-    const cookies = useAuth().cookies;
+    const { cookies } = useAuth();
 
     const { data, isLoading, mutate } = useSWRImmutable(
         [`${BASE_URL}/api/items/info?itemId=${uploadId}`, cookies],

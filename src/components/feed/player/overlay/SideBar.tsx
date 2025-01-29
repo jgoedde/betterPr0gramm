@@ -6,15 +6,15 @@ import {
     VolumeOff,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useVote } from "@/components/feed/player/use-vote.ts";
 import { cn } from "@/lib/utils.ts";
-import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
 import { Comment } from "@/components/feed/comments/Comment.ts";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 import { Upload } from "@/components/feed/Upload.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 
 type Props = {
     uploadId: number;
@@ -31,8 +31,7 @@ export const SideBar: FC<Props> = ({
     isLoading,
     uploadType,
 }) => {
-    const [benisTmp, setBenisTmp] = useState<number>(benis);
-    const { isUp, downvote, upvote, revokeVote, isDown } = useVote();
+    const { isUp, downvote, upvote, isDown } = useVote();
     const { cookies } = useAuth();
     const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
 
@@ -57,45 +56,47 @@ export const SideBar: FC<Props> = ({
                     _nonce: nonce,
                 }),
             });
+
+            // console.info("Should perform fetch now, but is stubbed...");
+            // console.log(
+            //     vote,
+            //     cookies,
+            //     nonce,
+            //     uploadId,
+            //     "vote,cookies,nonce,uploadId"
+            // );
         },
         [cookies, nonce, uploadId]
     );
 
-    const onUpvoteClick = useCallback(() => {
-        let vote: 0 | 1;
+    const benisTmp = useMemo(() => {
+        const score = benis;
 
-        if (isUp(uploadId)) {
-            revokeVote(uploadId);
-            setBenisTmp((prev) => prev - 1);
-            vote = 0;
-        } else {
-            upvote(uploadId);
-            setBenisTmp((prev) => prev + 1);
-            vote = 1;
+        if (isUp("posts", uploadId)) {
+            return score + 1;
         }
+        if (isDown("posts", uploadId)) {
+            return score - 1;
+        }
+
+        return score;
+    }, [benis, isDown, isUp, uploadId]);
+
+    const onUpvoteClick = useCallback(() => {
+        const vote = upvote("posts", uploadId) === "up" ? 1 : 0;
 
         if (cookies) {
             postVote(vote);
         }
-    }, [cookies, isUp, postVote, revokeVote, uploadId, upvote]);
+    }, [cookies, postVote, uploadId, upvote]);
 
     const onDownvoteClick = useCallback(() => {
-        let vote: 0 | -1;
-
-        if (isDown(uploadId)) {
-            revokeVote(uploadId);
-            setBenisTmp((prev) => prev + 1);
-            vote = 0;
-        } else {
-            downvote(uploadId);
-            setBenisTmp((prev) => prev - 1);
-            vote = -1;
-        }
+        const vote = downvote("posts", uploadId) === "down" ? -1 : 0;
 
         if (cookies) {
             postVote(vote);
         }
-    }, [cookies, downvote, isDown, postVote, revokeVote, uploadId]);
+    }, [cookies, downvote, postVote, uploadId]);
 
     return (
         <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">
@@ -105,7 +106,9 @@ export const SideBar: FC<Props> = ({
                     onClick={onUpvoteClick}
                 >
                     <PlusCircle
-                        className={cn(isUp(uploadId) && "text-red-600")}
+                        className={cn(
+                            isUp("posts", uploadId) && "text-red-600"
+                        )}
                         size={33}
                     />
                     {benisTmp >= 1 && <span>{benisTmp}</span>}
@@ -115,7 +118,9 @@ export const SideBar: FC<Props> = ({
                     onClick={onDownvoteClick}
                 >
                     <MinusCircle
-                        className={cn(isDown(uploadId) && "text-gray-600")}
+                        className={cn(
+                            isDown("posts", uploadId) && "text-gray-600"
+                        )}
                         size={33}
                     />
                     {benisTmp <= 0 && <span>{benisTmp}</span>}

@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
-    const { cookies } = useAuth();
+    const { cookies, isAuthenticated } = useAuth();
     const { comment, setComment, highlightedCommentId, comments } =
         useComments();
     const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -42,8 +42,8 @@ export const CommentsDrawerContent: FC<Props> = ({ revalidate, uploadId }) => {
     }, [highlightedCommentId, textAreaRef]);
 
     const isDisabled = useMemo(() => {
-        return isEmpty(comment) || !cookies;
-    }, [comment, cookies]);
+        return isEmpty(comment) || !isAuthenticated;
+    }, [comment, isAuthenticated]);
 
     const onSendClick = useCallback(async () => {
         await fetch(`${BASE_URL}/api/comments/post`, {

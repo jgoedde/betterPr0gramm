@@ -6,19 +6,42 @@ export type Cookies = {
     pp: string;
 };
 
-export function useAuth() {
-    const [cookies, updateCookies, deleteCookies] = useLocalStorage<Cookies>({
+export function useAuth(): {
+    updateCookies: (
+        val:
+            | Cookies
+            | ((prevState: Cookies | undefined) => Cookies | undefined)
+            | undefined
+    ) => void;
+    deleteCookies: () => void;
+} & (
+    | {
+          isAuthenticated: true;
+          cookies: Cookies;
+          username: string;
+      }
+    | {
+          isAuthenticated: false;
+          cookies: undefined;
+          username: undefined;
+      }
+) {
+    const [cookies, updateCookies, deleteCookies] = useLocalStorage<
+        Cookies | undefined
+    >({
         key: "betterPr0gramm-cookies",
+        getInitialValueInEffect: false,
     });
 
-    const isAuthenticated = useMemo(() => {
+    const isAuthenticated: boolean = useMemo(() => {
         return cookies != null;
     }, [cookies]);
 
-    const username = useMemo(() => {
+    const username: string | undefined = useMemo(() => {
         return cookies?.me?.n;
     }, [cookies]);
 
+    // @ts-expect-error -- Safe to suppress this here since this is just TS complaining about the union type.
     return { cookies, username, isAuthenticated, updateCookies, deleteCookies };
 }
 

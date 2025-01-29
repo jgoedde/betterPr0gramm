@@ -8,6 +8,9 @@ import { Panel } from "@/components/feed/comments/threads/Expandable.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Heart, ThumbsDown } from "lucide-react";
 import { useComments } from "@/components/feed/comments/context/CommentsContext.ts";
+import { useVote } from "@/components/feed/player/use-vote.ts";
+import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
+import { BASE_URL } from "@/api/pr0grammApi.ts";
 
 type Props = {
     comment: Comment;
@@ -31,8 +34,14 @@ export const ThreadItem: FC<Props> = ({
     expandedReplies,
     setExpandedComments,
 }) => {
+    const { isAuthenticated, cookies } = useAuth();
     const { setHighlightedCommentId, highlightedCommentId } = useComments();
-    const hasParent = comment.parent != 0;
+    const {
+        isUp: isItemUpvoted,
+        isDown: isItemDownvoted,
+        upvote,
+        downvote,
+    } = useVote();
 
     const isExpanded = useMemo(() => {
         return expandedReplies.includes(comment.id) || depth >= 1;
@@ -54,8 +63,67 @@ export const ThreadItem: FC<Props> = ({
         }
     }, [comment.id, highlightedCommentId, setHighlightedCommentId]);
 
+    const isUp = useMemo(() => {
+        return isItemUpvoted("comments", comment.id);
+    }, [comment.id, isItemUpvoted]);
+
+    const isDown = useMemo(() => {
+        return isItemDownvoted("comments", comment.id);
+    }, [comment.id, isItemDownvoted]);
+
+    const heartsCount = useMemo(() => {
+        const score = comment.up - comment.down;
+
+        if (isUp) {
+            return score + 1;
+        }
+        if (isDown) {
+            return score - 1;
+        }
+
+        return score;
+    }, [comment.down, comment.up, isDown, isUp]);
+
+    const postVote = useCallback(
+        async (vote: -1 | 0 | 1) => {
+            await fetch(`${BASE_URL}/api/comments/vote`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    ...buildCookiesHeader(cookies),
+                },
+                body: new URLSearchParams({
+                    id: String(comment.id),
+                    vote: String(vote),
+                }).toString(),
+            });
+        },
+        [comment.id, cookies]
+    );
+
+    const onHeartClick = useCallback(() => {
+        const vote = upvote("comments", comment.id) === "up" ? 1 : 0;
+
+        if (isAuthenticated) {
+            void postVote(vote);
+        }
+    }, [upvote, comment.id, isAuthenticated, postVote]);
+
+    const onThumbsDownClick = useCallback(() => {
+        const vote = downvote("comments", comment.id) === "down" ? -1 : 0;
+
+        if (isAuthenticated) {
+            void postVote(vote);
+        }
+    }, [downvote, comment.id, isAuthenticated, postVote]);
+
     return (
-        <div className={cn("pl-4", hasParent ? "border-l mt-4" : "mt-8")}>
+        <div
+            className={cn(
+                "pl-4",
+                comment.parent != 0 ? "border-l mt-4" : "mt-8"
+            )}
+        >
             <div
                 className={cn(
                     "transition-opacity duration-150 ease-in-out",
@@ -88,12 +156,22 @@ export const ThreadItem: FC<Props> = ({
                             : "Antworten"}
                     </Button>
                     <div className={"flex space-x-4 items-center"}>
-                        <div className={"flex items-center space-x-1"}>
+                        <div
+                            className={cn(
+                                "flex items-center space-x-1",
+                                isUp && "text-red-600"
+                            )}
+                            onClick={onHeartClick}
+                        >
                             <Heart size={18} />
-                            <span>{comment.up - comment.down}</span>
+                            <span>{heartsCount}</span>
                         </div>
                         <div>
-                            <ThumbsDown size={18} />
+                            <ThumbsDown
+                                className={cn(isDown && "text-gray-800")}
+                                size={18}
+                                onClick={onThumbsDownClick}
+                            />
                         </div>
                     </div>
                 </div>
