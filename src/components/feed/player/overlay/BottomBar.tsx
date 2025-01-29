@@ -55,7 +55,7 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                 </div>
                 <div
                     className={cn(
-                        "w-full overflow-x-auto flex whitespace-nowrap space-x-2"
+                        "w-full overflow-x-auto flex whitespace-nowrap space-x-2 pb-2"
                     )}
                 >
                     {otherTags.map((t) => (
