@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { ProfileOverview } from "@/components/profile/logged-in/ProfileOverview.tsx";
 import { LoginForm } from "@/components/profile/login/LoginForm.tsx";
 import { useAuth } from "@/hooks/use-auth.ts";
@@ -18,13 +17,9 @@ async function logout() {
  */
 
 export function ProfilePage() {
-    const { cookies } = useAuth();
+    const { isAuthenticated } = useAuth();
 
-    const isLoggedIn = useMemo(() => {
-        return cookies?.me.n != null;
-    }, [cookies?.me.n]);
-
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
         return <LoginForm />;
     }
 

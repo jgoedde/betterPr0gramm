@@ -1,13 +1,13 @@
+import { useLocalStorage } from "@mantine/hooks";
 import { useCallback } from "react";
-import { useLocalStorage } from "react-use";
 
 type VoteMap = Record<number, "up" | "down" | "none">;
 
 export function useVote() {
-    const [voting, setVoting] = useLocalStorage<VoteMap>(
-        "betterPr0gramm-votes",
-        {}
-    );
+    const [voting, setVoting] = useLocalStorage<VoteMap>({
+        key: "betterPr0gramm-votes",
+        defaultValue: {},
+    });
 
     const isUp = useCallback(
         (uploadId: number) => {

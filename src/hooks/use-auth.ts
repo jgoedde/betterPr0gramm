@@ -1,4 +1,4 @@
-import { useLocalStorage } from "react-use";
+import { useLocalStorage } from "@mantine/hooks";
 import { useMemo } from "react";
 
 export type Cookies = {
@@ -7,17 +7,17 @@ export type Cookies = {
 };
 
 export function useAuth() {
-    const [cookies, updateCookies, deleteCookies] = useLocalStorage<Cookies>(
-        "betterPr0gramm-cookies"
-    );
+    const [cookies, updateCookies, deleteCookies] = useLocalStorage<Cookies>({
+        key: "betterPr0gramm-cookies",
+    });
 
     const isAuthenticated = useMemo(() => {
         return cookies != null;
     }, [cookies]);
 
     const username = useMemo(() => {
-        return cookies?.me.n;
-    }, [cookies?.me.n]);
+        return cookies?.me?.n;
+    }, [cookies]);
 
     return { cookies, username, isAuthenticated, updateCookies, deleteCookies };
 }

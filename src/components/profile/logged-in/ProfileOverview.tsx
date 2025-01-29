@@ -16,11 +16,9 @@ import { Button } from "@/components/ui/button.tsx";
 import { useAuth } from "@/hooks/use-auth.ts";
 
 export const ProfileOverview: FC = () => {
-    const { cookies } = useAuth();
+    const { username: nickname } = useAuth();
 
-    const nickname = cookies!.me.n;
-
-    const { isLoading, data } = useProfileInfo(nickname);
+    const { isLoading, data } = useProfileInfo();
 
     return (
         <div className={"flex flex-col h-full"}>
