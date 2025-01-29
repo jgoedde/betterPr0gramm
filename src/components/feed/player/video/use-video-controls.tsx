@@ -1,12 +1,8 @@
-import { RefObject, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 
-export function useVideoControls({
-    videoRef,
-    blurredVideoRef,
-}: {
-    videoRef: RefObject<HTMLVideoElement>;
-    blurredVideoRef: RefObject<HTMLVideoElement>;
-}) {
+export function useVideoControls() {
+    const { videoRef, blurredVideoRef } = usePlaybackContext();
     const [isPlaying, setIsPlaying] = useState(true);
     const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -42,5 +38,15 @@ export function useVideoControls({
         setIsPlaying(true);
     }, [blurredVideoRef, videoRef]);
 
-    return { isMuted, isPlaying, mute, unMute, resume, pause };
+    const jumpToSecond = useCallback(
+        (second: number) => {
+            if (videoRef.current && blurredVideoRef.current) {
+                videoRef.current.currentTime =
+                    blurredVideoRef.current.currentTime = second;
+            }
+        },
+        [blurredVideoRef, videoRef]
+    );
+
+    return { isMuted, isPlaying, mute, unMute, resume, pause, jumpToSecond };
 }

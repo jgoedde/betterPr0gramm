@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePreferences } from "@/components/feed/use-preferences.ts";
 import { Spinner } from "@/components/ui/spinner.tsx";
 import { ContentTypeSelector } from "@/components/feed/ContentTypeSelector.tsx";
+import { VideoSeekbar } from "@/components/feed/player/overlay/VideoSeekbar.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
@@ -90,6 +91,10 @@ export function HomeFeed() {
             )}
             <div className={"absolute top-2 left-1/2 -translate-x-1/2"}>
                 <ContentTypeSelector />
+            </div>
+
+            <div className={"absolute bottom-0 w-full"}>
+                <VideoSeekbar />
             </div>
         </div>
     );

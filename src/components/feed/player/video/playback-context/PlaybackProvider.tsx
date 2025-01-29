@@ -1,17 +1,21 @@
-import { FC, ReactNode, useMemo, useState } from "react";
+import { FC, ReactNode, useMemo, useRef, useState } from "react";
 import { PlaybackContext } from "./PlaybackContext.ts";
 
 export const PlaybackProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [shouldPlayAudio, setShouldPlayAudio] = useState(false); // Idea: We could store that in LS.
-    const [shouldShowCaptions] = useState(false);
 
-    const value = useMemo(() => {
-        return {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const blurredVideoRef = useRef<HTMLVideoElement>(null);
+
+    const value = useMemo(
+        () => ({
             shouldPlayAudio,
-            shouldShowCaptions,
             setShouldPlayAudio,
-        };
-    }, [shouldPlayAudio, shouldShowCaptions]);
+            videoRef,
+            blurredVideoRef,
+        }),
+        [shouldPlayAudio]
+    );
 
     return (
         <PlaybackContext.Provider value={value}>

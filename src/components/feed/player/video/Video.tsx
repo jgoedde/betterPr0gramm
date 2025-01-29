@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef } from "react";
+import { FC, useCallback, useEffect } from "react";
 import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 
@@ -7,12 +7,10 @@ export const Video: FC<{
     uploadId: number;
     currentUploadId: number;
 }> = ({ src, uploadId, currentUploadId }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const blurredVideoRef = useRef<HTMLVideoElement>(null);
     const { resume, mute, unMute, isMuted, pause, isPlaying } =
-        useVideoControls({ videoRef, blurredVideoRef });
+        useVideoControls();
 
-    const { shouldPlayAudio } = usePlaybackContext();
+    const { shouldPlayAudio, videoRef, blurredVideoRef } = usePlaybackContext();
 
     useEffect(() => {
         if (!videoRef.current) {
@@ -22,10 +20,11 @@ export const Video: FC<{
         if (shouldPlayAudio && isMuted) {
             unMute();
         }
+
         if (!shouldPlayAudio && !isMuted) {
             mute();
         }
-    }, [isMuted, mute, shouldPlayAudio, unMute]);
+    }, [isMuted, mute, shouldPlayAudio, unMute, videoRef]);
 
     // This hook is responsible for pausing the video that we just swiped away and play the new one.
     useEffect(() => {
