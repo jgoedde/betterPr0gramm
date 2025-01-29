@@ -63,14 +63,6 @@ export const LoginForm: FC = () => {
         toast({
             title: "Successfully logged in!",
             description: `You are now logged in as ${username}. Access your uploads, collections & comments.`,
-            action: (
-                <ToastAction
-                    onClick={() => location.reload()}
-                    altText="Refresh"
-                >
-                    Show my profile!
-                </ToastAction>
-            ),
         });
     }, [captcha, captchaStr, password, toast, updateCookies, username]);
 
@@ -79,72 +71,75 @@ export const LoginForm: FC = () => {
     }
 
     return (
-        <div className="min-h-full px-6">
-            <div className="mt-10">
-                <div className="space-y-6">
-                    <div>
-                        <Label htmlFor="username">Username</Label>
-                        <div className="mt-2">
-                            <Input
-                                type="text"
-                                name="username"
-                                id="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="password">Password</Label>
-                        </div>
-                        <div className="mt-2">
-                            <Input
-                                type="password"
-                                name="password"
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                autoComplete="current-password"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <img src={`${captcha.captcha}`} alt={"Captcha"} />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="captcha">Captcha</Label>
-
-                        <div className="mt-2">
-                            <Input
-                                autoCapitalize={"on"}
-                                type="text"
-                                value={captchaStr}
-                                onChange={(e) => setCaptchaStr(e.target.value)}
-                                name="captcha"
-                                id="captcha"
-                                required
-                                className="w-1/4"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Button
-                            onClick={login}
-                            // type="submit"
-                            className="flex w-full justify-center"
-                        >
-                            Sign in
-                        </Button>
+        <form
+            className="min-h-full px-6 mt-10"
+            onSubmit={(e) => {
+                e.preventDefault();
+            }}
+        >
+            <div className="space-y-6">
+                <div>
+                    <Label htmlFor="username">Username</Label>
+                    <div className="mt-2">
+                        <Input
+                            type="text"
+                            name="username"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
                     </div>
                 </div>
+
+                <div>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                    </div>
+                    <div className="mt-2">
+                        <Input
+                            type="password"
+                            name="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <img src={`${captcha.captcha}`} alt={"Captcha"} />
+                </div>
+
+                <div>
+                    <Label htmlFor="captcha">Captcha</Label>
+
+                    <div className="mt-2">
+                        <Input
+                            autoCapitalize={"on"}
+                            type="text"
+                            value={captchaStr}
+                            onChange={(e) => setCaptchaStr(e.target.value)}
+                            name="captcha"
+                            id="captcha"
+                            required
+                            className="w-1/4"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <Button
+                        onClick={login}
+                        // type="submit"
+                        className="flex w-full justify-center"
+                    >
+                        Sign in
+                    </Button>
+                </div>
             </div>
-        </div>
+        </form>
     );
 };
