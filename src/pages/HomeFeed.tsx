@@ -5,35 +5,23 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel.tsx";
 import { Upload } from "@/components/feed/player/Upload.tsx";
-import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
+import { TAKE_POSTS, useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
-import { usePreferences } from "@/components/feed/use-preferences.ts";
 import { Spinner } from "@/components/ui/spinner.tsx";
-import { ContentTypeSelector } from "@/components/feed/ContentTypeSelector.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
     const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const { preferences } = usePreferences();
-    const { feed, loadMore, isLoading } = useDoomscroll(
-        currentSlide,
-        preferences
-    );
-
-    useEffect(() => {
-        if (!api) {
-            return;
-        }
-
-        api.scrollTo(0);
-    }, [api, preferences.feed]);
+    const { feed, loadMore, isLoading } = useDoomscroll(currentSlide);
 
     /**
      * A slide animation was fulfilled. Either we jumped to the next or previous video/image.
      */
     const onSettle = useCallback(() => {
-        loadMore();
-    }, [loadMore]);
+        if (feed.length - currentSlide < TAKE_POSTS) {
+            loadMore();
+        }
+    }, [currentSlide, feed.length, loadMore]);
 
     const onSelect = useCallback(() => {
         if (!api) {
@@ -71,11 +59,10 @@ export function HomeFeed() {
                 <CarouselContent>
                     {feed.map((upload) => (
                         <CarouselItem
-                            key={`carousel-item-upload-${upload.id}`}
+                            key={`upload-${upload.id}-${upload.occurrence.getTime()}`}
                             className="relative"
                         >
                             <Upload
-                                key={`upload-${upload.id}`}
                                 upload={upload}
                                 currentUploadId={feed[currentSlide].id}
                             />
@@ -88,9 +75,6 @@ export function HomeFeed() {
                     <Spinner />
                 </div>
             )}
-            <div className={"absolute top-2 left-1/2 -translate-x-1/2"}>
-                <ContentTypeSelector />
-            </div>
         </div>
     );
 }

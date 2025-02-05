@@ -1,94 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR, { Fetcher } from "swr";
-import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
-import { FeedPreferences } from "@/components/feed/use-preferences.ts";
-import { BASE_URL } from "@/api/pr0grammApi.ts";
-import { uniqBy } from "lodash";
+import { differenceBy, shuffle, uniqBy } from "lodash";
+import { useSeen } from "@/components/feed/use-seen.ts";
+import { ItemResponse, useTopPosts } from "@/components/feed/use-top-posts.ts";
+import { buildFeedItem, FeedItem } from "@/components/feed/FeedItem.ts";
 
-type ItemResponse = {
-    height: number;
-    width: number;
-    id: number;
-    up: number;
-    down: number;
-    created: number;
-    image: string;
-    user: string;
-};
+export const TAKE_POSTS = 3;
 
-type GetPostsResponse = {
-    items: ItemResponse[];
-};
-
-const TAKE_POSTS = 3;
-
-type CacheKey = {
-    contentType: number;
-    feed: "beliebt" | "neu";
-    baseUrl: string;
-    cookies: Cookies | undefined;
-};
-
-const fetcher: Fetcher<GetPostsResponse, CacheKey> = async ({
-    contentType,
-    baseUrl,
-    cookies,
-    feed,
-}) => {
-    const urlSearchParams = new URLSearchParams({
-        flags: String(contentType),
-        ...(feed === "beliebt" && { promoted: "1" }),
-        showJunk: String(false),
-    });
-
-    const response = await fetch(`${baseUrl}?${urlSearchParams.toString()}`, {
-        method: "GET",
-        headers: {
-            ...buildCookiesHeader(cookies),
-        },
-    });
-
-    return (await response.json()) as GetPostsResponse;
-};
-
-export function useDoomscroll(
-    currentIndex: number,
-    feedPreferences: FeedPreferences
-) {
+export function useDoomscroll(currentIndex: number) {
     const [uploads, setUploads] = useState<ItemResponse[]>([]);
     const [feed, setFeed] = useState<FeedItem[]>([]);
 
-    const cookies = useAuth().cookies;
+    const { seen, markAsSeen } = useSeen();
 
-    /**
-     * Clear everything on Neu/Beliebt switch
-     */
-    useEffect(() => {
-        setUploads([]);
-        setFeed([]);
-    }, [feedPreferences.feed]);
-
-    const { data, isLoading } = useSWR(
-        () => ({
-            contentType: feedPreferences.contentType,
-            feed: feedPreferences.feed,
-            baseUrl: `${BASE_URL}/api/items/get`,
-            cookies,
-        }),
-        fetcher
-    );
+    const { topPosts, revalidate, isLoading } = useTopPosts();
 
     useEffect(() => {
-        if (!data?.items) {
+        if (uploads.length > 0 && uploads.every((u) => seen[u.id] != null)) {
+            revalidate();
+        }
+    }, [revalidate, seen, uploads]);
+
+    useEffect(() => {
+        if (!topPosts?.items) {
             return;
         }
 
-        const newUploads = data.items;
-
         setUploads((prevItems) => {
-            const uniqueUploads = newUploads.filter(
-                (item) => !prevItems.some((prevItem) => prevItem.id === item.id)
-            );
+            const uniqueUploads = differenceBy(topPosts.items, prevItems, "id");
 
             if (uniqueUploads.length === 0) {
                 return prevItems;
@@ -96,17 +34,48 @@ export function useDoomscroll(
 
             const after = prevItems.slice(currentIndex + 1);
             const before = prevItems.slice(0, currentIndex + 1);
-            return [...before, ...uniqueUploads, ...after];
-        });
-    }, [data?.items, currentIndex]);
 
-    //#region seed
+            console.group(`new uploads ${new Date().toISOString()}`);
+            console.info("Found new uploads");
+            console.log(
+                before.map((b) => ({ id: b.id, user: b.user })),
+                "before"
+            );
+            console.log(
+                uniqueUploads.map((b) => ({ id: b.id, user: b.user })),
+                "uniqueUploads"
+            );
+            console.log(
+                after.map((b) => ({ id: b.id, user: b.user })),
+                "after"
+            );
+            console.log(currentIndex, "currentIndex");
+            console.groupEnd();
+
+            const afterShuffled = shuffle(after);
+            const uniqueShuffled = shuffle(uniqueUploads);
+
+            const uniqueOrdered = [
+                ...uniqueShuffled.filter((upload) => seen[upload.id] == null),
+                ...uniqueShuffled.filter((upload) => seen[upload.id] != null),
+            ];
+
+            const afterOrdered = [
+                ...afterShuffled.filter((upload) => seen[upload.id] == null),
+                ...afterShuffled.filter((upload) => seen[upload.id] != null),
+            ];
+
+            return [...before, ...uniqueOrdered, ...afterOrdered];
+        });
+    }, [currentIndex, seen, topPosts?.items]);
+
+    //region seed
     useEffect(() => {
         if (feed.length === 0 && uploads.length > 0) {
             setFeed(uploads.slice(0, TAKE_POSTS).map(buildFeedItem));
         }
     }, [feed.length, uploads]);
-    //#endregion
+    //endregion
 
     const next = useMemo(() => {
         return uploads
@@ -126,33 +95,17 @@ export function useDoomscroll(
         );
     }, [next]);
 
+    useEffect(() => {
+        if (feed[currentIndex]) {
+            markAsSeen(feed[currentIndex].id);
+        }
+    }, [currentIndex, feed, markAsSeen]);
+
+    useEffect(() => {
+        console.group("feed change " + new Date().toISOString());
+        console.log(feed, "feed");
+        console.groupEnd();
+    }, [feed]);
+
     return { feed, loadMore, isLoading };
-}
-
-export type FeedItem = {
-    id: number;
-    src: string;
-    benis: number;
-    uploaderName: string;
-    uploadedAt: Date;
-    height: number;
-    width: number;
-    type: "video" | "image";
-};
-
-function buildFeedItem(res: ItemResponse): FeedItem {
-    const type = res.image.includes("mp4") ? "video" : "image";
-    return {
-        id: res.id,
-        src:
-            type === "image"
-                ? `https://img.pr0gramm.com/${res.image}`
-                : `https://vid.pr0gramm.com/${res.image}`,
-        uploadedAt: new Date(Number(res.created + "000")),
-        uploaderName: res.user,
-        benis: res.up - res.down,
-        height: res.height,
-        width: res.width,
-        type,
-    };
 }
