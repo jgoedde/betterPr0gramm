@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { differenceBy, shuffle, uniqBy } from "lodash";
+import { differenceBy, uniqBy } from "lodash";
 import { useSeen } from "@/components/feed/use-seen.ts";
 import { ItemResponse, useTopPosts } from "@/components/feed/use-top-posts.ts";
 import { buildFeedItem, FeedItem } from "@/components/feed/FeedItem.ts";
@@ -52,17 +52,14 @@ export function useDoomscroll(currentIndex: number) {
             console.log(currentIndex, "currentIndex");
             console.groupEnd();
 
-            const afterShuffled = shuffle(after);
-            const uniqueShuffled = shuffle(uniqueUploads);
-
             const uniqueOrdered = [
-                ...uniqueShuffled.filter((upload) => seen[upload.id] == null),
-                ...uniqueShuffled.filter((upload) => seen[upload.id] != null),
+                ...uniqueUploads.filter((upload) => seen[upload.id] == null),
+                ...uniqueUploads.filter((upload) => seen[upload.id] != null),
             ];
 
             const afterOrdered = [
-                ...afterShuffled.filter((upload) => seen[upload.id] == null),
-                ...afterShuffled.filter((upload) => seen[upload.id] != null),
+                ...after.filter((upload) => seen[upload.id] == null),
+                ...after.filter((upload) => seen[upload.id] != null),
             ];
 
             return [...before, ...uniqueOrdered, ...afterOrdered];
