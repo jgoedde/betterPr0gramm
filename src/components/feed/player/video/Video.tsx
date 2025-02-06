@@ -1,6 +1,8 @@
-import { FC, useCallback, useEffect, useRef } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { RefreshCcw } from "lucide-react";
 
 export const Video: FC<{
     src: string;
@@ -9,6 +11,8 @@ export const Video: FC<{
 }> = ({ src, uploadId, currentUploadId }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const blurredVideoRef = useRef<HTMLVideoElement>(null);
+    const [didFailToLoad, setDidFailToLoad] = useState(false);
+
     const { resume, mute, unMute, isMuted, pause, isPlaying } =
         useVideoControls({ videoRef, blurredVideoRef });
 
@@ -26,6 +30,15 @@ export const Video: FC<{
             mute();
         }
     }, [isMuted, mute, shouldPlayAudio, unMute]);
+
+    const reload = useCallback(() => {
+        setDidFailToLoad(false);
+
+        if (videoRef.current) {
+            videoRef.current.load();
+            void resume();
+        }
+    }, [resume]);
 
     // This hook is responsible for pausing the video that we just swiped away and play the new one.
     useEffect(() => {
@@ -48,6 +61,19 @@ export const Video: FC<{
         }
     }, [isPlaying, pause, resume]);
 
+    if (didFailToLoad) {
+        return (
+            <div className={"flex flex-col items-center space-y-2"}>
+                <div className={"text-white text-opacity-50"}>
+                    Oops... That video did not load :(
+                </div>
+                <Button variant={"outline"} size={"icon"} onClick={reload}>
+                    <RefreshCcw className={"text-white"} />
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <>
             <video
@@ -58,6 +84,13 @@ export const Video: FC<{
                 muted={!shouldPlayAudio}
                 playsInline
                 onClick={onVideoClick}
+                onError={() => {
+                    setDidFailToLoad(true);
+                    console.warn(
+                        "Encountered an error while playing the video"
+                    );
+                    console.error(videoRef.current?.error?.code);
+                }}
             >
                 <source src={src} />
             </video>
