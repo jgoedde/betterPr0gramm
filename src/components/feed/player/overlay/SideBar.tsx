@@ -2,7 +2,7 @@ import {
     MessageSquareMore,
     MinusCircle,
     PlusCircle,
-    Volume,
+    Volume2,
     VolumeOff,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
@@ -131,7 +131,7 @@ export const SideBar: FC<Props> = ({
             {uploadType === "video" && (
                 <div className={"flex flex-col items-center justify-center"}>
                     {shouldPlayAudio ? (
-                        <Volume
+                        <Volume2
                             size={33}
                             onClick={() => setShouldPlayAudio(false)}
                         />
