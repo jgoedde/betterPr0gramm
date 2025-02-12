@@ -94,17 +94,6 @@ export const Video: FC<{
             >
                 <source src={src} />
             </video>
-            <video
-                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 -z-10"
-                autoPlay
-                loop
-                ref={blurredVideoRef}
-                muted
-                playsInline
-                onClick={onVideoClick}
-            >
-                <source src={src} />
-            </video>
         </>
     );
 };
