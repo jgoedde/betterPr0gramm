@@ -98,7 +98,7 @@ export const TagPopover: FC<Props> = ({ tag }) => {
                     className={badgeVariants({
                         variant: "default",
                         className:
-                            "border-orange-600 bg-secondary text-white hover:bg-orange-600 select-none",
+                            "border-orange-600 bg-secondary text-white hover:bg-orange-600",
                     })}
                 >
                     {tag.name}
