@@ -11,6 +11,7 @@ import { useVote } from "@/components/feed/player/use-vote.ts";
 import { cn } from "@/lib/utils.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
+import { useLongPress } from "react-use";
 
 type Props = { tag: Tag };
 
@@ -18,6 +19,18 @@ export const TagPopover: FC<Props> = ({ tag }) => {
     const { isUp, isDown, upvote, downvote } = useVote();
     const { isAuthenticated, extractNonce, cookies } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+
+    const longPressHandlers = useLongPress(
+        () => {
+            setIsOpen(true);
+            if ("vibrate" in navigator) {
+                navigator.vibrate(200);
+            }
+        },
+        {
+            delay: 450,
+        }
+    );
 
     const isUpvoted = useMemo(() => {
         return isUp("tags", tag.id);
@@ -74,8 +87,14 @@ export const TagPopover: FC<Props> = ({ tag }) => {
             onOpenChange={setIsOpen}
             key={`popover-tag-${tag.id}`}
         >
-            <PopoverTrigger asChild>
+            <PopoverTrigger
+                onClick={(e) => {
+                    e.preventDefault();
+                }}
+                asChild
+            >
                 <div
+                    {...longPressHandlers}
                     className={badgeVariants({
                         variant: "default",
                         className:
