@@ -3,6 +3,7 @@ import { useVideoControls } from "@/components/feed/player/video/use-video-contr
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { RefreshCcw } from "lucide-react";
+import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
 
 export const Video: FC<{
     src: string;
@@ -10,11 +11,12 @@ export const Video: FC<{
     currentUploadId: number;
 }> = ({ src, uploadId, currentUploadId }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const blurredVideoRef = useRef<HTMLVideoElement>(null);
-    const [didFailToLoad, setDidFailToLoad] = useState(false);
+
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { resume, mute, unMute, isMuted, pause, isPlaying } =
-        useVideoControls({ videoRef, blurredVideoRef });
+        useVideoControls({ videoRef });
 
     const { shouldPlayAudio } = usePlaybackContext();
 
@@ -31,43 +33,62 @@ export const Video: FC<{
         }
     }, [isMuted, mute, shouldPlayAudio, unMute]);
 
-    const reload = useCallback(() => {
-        setDidFailToLoad(false);
-
+    const onReloadButtonClick = useCallback(() => {
         if (videoRef.current) {
+            setHasError(false);
+            setIsLoading(true);
+
             videoRef.current.load();
             void resume();
         }
     }, [resume]);
 
-    // This hook is responsible for pausing the video that we just swiped away and play the new one.
-    useEffect(() => {
-        if (currentUploadId === uploadId) {
-            // Autoplay after 200ms
-            setTimeout(() => {
-                void resume();
-            }, 200);
-        } else {
-            // Pause the other video after swipe
-            pause();
-        }
-    }, [currentUploadId, pause, resume, uploadId]);
+    useEffect(
+        function playVideo() {
+            if (currentUploadId === uploadId) {
+                // Autoplay after 200ms
+                setTimeout(() => {
+                    void resume();
+                }, 200);
+            } else {
+                // Pause the other video after swipe
+                pause();
+            }
+        },
+        [currentUploadId, pause, resume, uploadId]
+    );
 
     const onVideoClick = useCallback(() => {
+        if (isLoading) {
+            return;
+        }
+
         if (isPlaying) {
             pause();
         } else {
             void resume();
         }
-    }, [isPlaying, pause, resume]);
+    }, [isLoading, isPlaying, pause, resume]);
 
-    if (didFailToLoad) {
+    const onVideoError = useCallback(() => {
+        console.warn("Encountered an error while playing the video");
+        console.error(videoRef.current?.error?.code);
+
+        setHasError(true);
+        setIsLoading(false);
+    }, []);
+
+    if (hasError) {
         return (
             <div className={"flex flex-col items-center space-y-2"}>
                 <div className={"text-white text-opacity-50"}>
                     Oops... That video did not load :(
                 </div>
-                <Button variant={"outline"} size={"icon"} onClick={reload}>
+                <Button
+                    variant={"outline"}
+                    size={"icon"}
+                    onClick={onReloadButtonClick}
+                >
                     <RefreshCcw className={"text-white"} />
                 </Button>
             </div>
@@ -76,6 +97,7 @@ export const Video: FC<{
 
     return (
         <>
+            {isLoading && <FullScreenSpinner />}
             <video
                 ref={videoRef}
                 className="w-full h-full max-w-full max-h-full object-contain"
@@ -84,13 +106,9 @@ export const Video: FC<{
                 muted={!shouldPlayAudio}
                 playsInline
                 onClick={onVideoClick}
-                onError={() => {
-                    setDidFailToLoad(true);
-                    console.warn(
-                        "Encountered an error while playing the video"
-                    );
-                    console.error(videoRef.current?.error?.code);
-                }}
+                onWaiting={() => setIsLoading(true)}
+                onCanPlay={() => setIsLoading(false)}
+                onError={onVideoError}
             >
                 <source src={src} />
             </video>
