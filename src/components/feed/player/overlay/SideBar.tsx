@@ -1,4 +1,5 @@
 import {
+    Bookmark,
     MessageSquareMore,
     MinusCircle,
     PlusCircle,
@@ -15,6 +16,9 @@ import { Comment } from "@/components/feed/comments/Comment.ts";
 import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 import { Upload } from "@/components/feed/Upload.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
+import { useToast } from "@/hooks/use-toast.ts";
+import { ToastAction } from "@/components/ui/toast.tsx";
+import { useNavigation } from "@/hooks/use-navigation.ts";
 
 type Props = {
     uploadId: number;
@@ -31,9 +35,11 @@ export const SideBar: FC<Props> = ({
     isLoading,
     uploadType,
 }) => {
-    const { isUp, downvote, upvote, isDown } = useVote();
+    const { isUp, isFav, downvote, upvote, isDown, fav } = useVote();
+    const { toast } = useToast();
     const { cookies, extractNonce, isAuthenticated } = useAuth();
     const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
+    const { goTo } = useNavigation();
 
     const postVote = useCallback(
         (vote: 1 | 0 | -1) => {
@@ -58,6 +64,25 @@ export const SideBar: FC<Props> = ({
         },
         [cookies, extractNonce, isAuthenticated, uploadId]
     );
+
+    const postFav = useCallback(() => {
+        if (!isAuthenticated) return;
+
+        const nonce = extractNonce();
+
+        void fetch(`${BASE_URL}/api/collections/add`, {
+            headers: {
+                "content-type":
+                    "application/x-www-form-urlencoded; charset=UTF-8",
+                ...buildCookiesHeader(cookies),
+            },
+            body: new URLSearchParams({
+                itemId: String(uploadId),
+                _nonce: nonce,
+            }).toString(),
+            method: "POST",
+        });
+    }, [cookies, extractNonce, isAuthenticated, uploadId]);
 
     const benisTmp = useMemo(() => {
         const score = benis;
@@ -88,9 +113,35 @@ export const SideBar: FC<Props> = ({
         }
     }, [cookies, downvote, postVote, uploadId]);
 
+    const onFavClick = useCallback(() => {
+        if (!isAuthenticated) {
+            toast({
+                description:
+                    "Du musst dich mit deinem pr0gramm-Konto einloggen, um Hochlads zu favorisieren",
+                action: (
+                    <ToastAction
+                        altText={"Zum login"}
+                        onClick={() => goTo("profile")}
+                    >
+                        Zum Login
+                    </ToastAction>
+                ),
+            });
+            return;
+        }
+        fav(uploadId);
+
+        postFav();
+    }, [fav, goTo, isAuthenticated, postFav, toast, uploadId]);
+
     return (
         <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">
-            <div className={"my-4"}>
+            <Bookmark
+                onClick={onFavClick}
+                className={cn(isFav(uploadId) && "text-red-600")}
+                size={33}
+            />
+            <div className={"mb-4"}>
                 <div
                     className={"flex flex-col items-center justify-center"}
                     onClick={onUpvoteClick}

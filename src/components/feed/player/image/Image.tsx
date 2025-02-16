@@ -3,23 +3,27 @@ import { Button } from "@/components/ui/button.tsx";
 import { RefreshCcw } from "lucide-react";
 import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
 
-export const Image: FC<{ src: string }> = ({ src }) => {
-    const [didFailToLoad, setDidFailToLoad] = useState(false);
+type Props = { src: string };
+
+export const Image: FC<Props> = ({ src }) => {
+    const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     const onImgError = useCallback(() => {
-        setDidFailToLoad(true);
+        setHasError(true);
         setIsLoading(false);
     }, []);
 
-    const onImgLoad = useCallback(() => setIsLoading(false), []);
+    const onImgLoad = useCallback(() => {
+        setIsLoading(false);
+    }, []);
 
     const reload = () => {
-        setDidFailToLoad(false);
+        setHasError(false);
         setIsLoading(true);
     };
 
-    if (didFailToLoad) {
+    if (hasError) {
         return (
             <div className="flex flex-col items-center space-y-2">
                 <div className="text-white text-opacity-50">

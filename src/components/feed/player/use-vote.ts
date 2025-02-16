@@ -1,5 +1,6 @@
 import { useLocalStorage } from "@mantine/hooks";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { isArray } from "lodash";
 
 type ItemIdToVote = Record<number, "up" | "down" | "none">;
 
@@ -7,6 +8,7 @@ type Votes = {
     comments: ItemIdToVote;
     posts: ItemIdToVote;
     tags: ItemIdToVote;
+    favs: number[];
 };
 
 export function useVote() {
@@ -16,8 +18,19 @@ export function useVote() {
             comments: {},
             posts: {},
             tags: {},
+            favs: [],
         },
     });
+
+    useEffect(
+        function migrateToFavs() {
+            if (isArray(voting.favs)) {
+                return;
+            }
+            setVoting((prev) => ({ ...prev, favs: prev.favs ?? [] }));
+        },
+        [setVoting, voting.favs]
+    );
 
     const isUp = useCallback(
         (type: keyof Votes, itemId: number) => {
@@ -77,10 +90,38 @@ export function useVote() {
             [isDown, revokeVote, setVoting]
         );
 
+    const fav = useCallback(
+        (uploadId: number) => {
+            if (voting.favs.includes(uploadId)) {
+                // Unfav:
+                setVoting((prev) => ({
+                    ...prev,
+                    favs: [...prev.favs].filter((x) => x !== uploadId),
+                }));
+            } else {
+                // Fav:
+                setVoting((prev) => ({
+                    ...prev,
+                    favs: [...prev.favs, uploadId],
+                }));
+            }
+        },
+        [setVoting, voting.favs]
+    );
+
+    const isFav = useCallback(
+        (uploadId: number) => {
+            return voting.favs.includes(uploadId);
+        },
+        [voting.favs]
+    );
+
     return {
         isUp,
         isDown,
         upvote,
         downvote,
+        fav,
+        isFav,
     };
 }
