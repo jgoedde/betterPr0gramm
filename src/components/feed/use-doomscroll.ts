@@ -62,7 +62,12 @@ export function useDoomscroll(currentIndex: number) {
                 ...after.filter((upload) => seen[upload.id] != null),
             ];
 
-            return [...before, ...uniqueOrdered, ...afterOrdered];
+            return [
+                ...before,
+                ...[...uniqueOrdered, ...afterOrdered].filter(
+                    (item) => item.height <= 2000
+                ),
+            ];
         });
     }, [currentIndex, seen, topPosts?.items]);
 
