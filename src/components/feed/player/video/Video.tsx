@@ -1,37 +1,38 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react";
-import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
-import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { RefreshCcw } from "lucide-react";
 import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 export const Video: FC<{
     src: string;
     uploadId: number;
-    currentUploadId: number;
-}> = ({ src, uploadId, currentUploadId }) => {
+    carouselIndex: number;
+}> = ({ src, uploadId, carouselIndex }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { resume, mute, unMute, isMuted, pause, isPlaying } =
-        useVideoControls({ videoRef });
+    const {
+        currentUploadId,
+        isMuted,
+        play,
+        pause,
+        isPlaying,
+        currentFeedIndex,
+    } = useFeedContext();
 
-    const { shouldPlayAudio } = usePlaybackContext();
+    useEffect(
+        function syncMuted() {
+            if (!videoRef.current) {
+                return;
+            }
 
-    useEffect(() => {
-        if (!videoRef.current) {
-            return;
-        }
-
-        if (shouldPlayAudio && isMuted) {
-            unMute();
-        }
-        if (!shouldPlayAudio && !isMuted) {
-            mute();
-        }
-    }, [isMuted, mute, shouldPlayAudio, unMute]);
+            videoRef.current.muted = isMuted;
+        },
+        [isMuted]
+    );
 
     const onReloadButtonClick = useCallback(() => {
         if (videoRef.current) {
@@ -39,36 +40,60 @@ export const Video: FC<{
             setIsLoading(true);
 
             videoRef.current.load();
-            void resume();
+            play();
         }
-    }, [resume]);
+    }, [play]);
+
+    useEffect(() => {
+        if (!videoRef.current) {
+            return;
+        }
+
+        if (currentUploadId === uploadId) {
+            // Autoplay after 200ms
+            setTimeout(() => {
+                if (!videoRef.current) {
+                    return;
+                }
+
+                void videoRef.current.play();
+            }, 200);
+        } else {
+            // Pause the other video after swipe
+            videoRef.current.pause();
+        }
+    }, [currentUploadId, pause, play, uploadId]);
 
     useEffect(
-        function playVideo() {
-            if (currentUploadId === uploadId) {
-                // Autoplay after 200ms
-                setTimeout(() => {
-                    void resume();
-                }, 200);
+        function syncPlaying() {
+            if (!videoRef.current) {
+                return;
+            }
+
+            if (currentUploadId !== uploadId) {
+                return;
+            }
+
+            if (isPlaying) {
+                void videoRef.current.play();
             } else {
-                // Pause the other video after swipe
-                pause();
+                videoRef.current?.pause();
             }
         },
-        [currentUploadId, pause, resume, uploadId]
+        [currentUploadId, isPlaying, uploadId]
     );
 
     const onVideoClick = useCallback(() => {
-        if (isLoading) {
+        if (isLoading || !videoRef.current) {
             return;
         }
 
         if (isPlaying) {
             pause();
         } else {
-            void resume();
+            play();
         }
-    }, [isLoading, isPlaying, pause, resume]);
+    }, [isLoading, isPlaying, pause, play]);
 
     const onVideoError = useCallback(() => {
         console.warn("Encountered an error while playing the video");
@@ -80,6 +105,7 @@ export const Video: FC<{
 
     const handleVisibilityChange = useCallback(() => {
         if (document.hidden) {
+            videoRef.current?.pause();
             pause();
         }
     }, [pause]);
@@ -98,7 +124,7 @@ export const Video: FC<{
                 );
             };
         },
-        [handleVisibilityChange, pause]
+        [handleVisibilityChange]
     );
 
     if (hasError) {
@@ -118,15 +144,19 @@ export const Video: FC<{
         );
     }
 
+    if (currentFeedIndex - carouselIndex > 2) {
+        return <></>;
+    }
+
     return (
         <>
             {isLoading && <FullScreenSpinner />}
             <video
                 ref={videoRef}
                 className="w-full h-full max-w-full max-h-full object-contain"
-                autoPlay
                 loop
-                muted={!shouldPlayAudio}
+                autoPlay
+                muted={isMuted}
                 playsInline
                 onClick={onVideoClick}
                 onWaiting={() => setIsLoading(true)}

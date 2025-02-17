@@ -1,7 +1,7 @@
 import { HomeFeed } from "@/pages/HomeFeed.tsx";
 import { ProfilePage } from "@/pages/ProfilePage.tsx";
 import { useNavigation } from "@/hooks/use-navigation.ts";
-import { PlaybackProvider } from "@/components/feed/player/video/playback-context/PlaybackProvider.tsx";
+import { FeedProvider } from "@/components/feed/context/FeedProvider.tsx";
 
 export const ContentWrapper = () => {
     const { view } = useNavigation();
@@ -10,9 +10,9 @@ export const ContentWrapper = () => {
         <div className="grow">
             {view === "home" && (
                 <div className={"bg-home-background text-home-color h-full"}>
-                    <PlaybackProvider>
+                    <FeedProvider>
                         <HomeFeed />
-                    </PlaybackProvider>
+                    </FeedProvider>
                 </div>
             )}
             {view === "profile" && <ProfilePage />}

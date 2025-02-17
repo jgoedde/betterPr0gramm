@@ -8,27 +8,29 @@ import { Upload } from "@/components/feed/player/Upload.tsx";
 import { TAKE_POSTS, useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner.tsx";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
-    const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const { feed, loadMore, isLoading } = useDoomscroll(currentSlide);
+    const { currentFeedIndex, setCurrentFeedIndex, setCurrentUploadId } =
+        useFeedContext();
+    const { feed, loadMore, isLoading } = useDoomscroll(currentFeedIndex);
 
     /**
      * A slide animation was fulfilled. Either we jumped to the next or previous video/image.
      */
     const onSettle = useCallback(() => {
-        if (feed.length - currentSlide < TAKE_POSTS) {
+        if (feed.length - currentFeedIndex < TAKE_POSTS) {
             loadMore();
         }
-    }, [currentSlide, feed.length, loadMore]);
+    }, [currentFeedIndex, feed.length, loadMore]);
 
     const onSelect = useCallback(() => {
         if (!api) {
             return;
         }
-        setCurrentSlide(api.selectedScrollSnap());
-    }, [api]);
+        setCurrentFeedIndex(api.selectedScrollSnap());
+    }, [api, setCurrentFeedIndex]);
 
     useEffect(() => {
         if (!api) {
@@ -46,6 +48,13 @@ export function HomeFeed() {
         };
     }, [api, onSelect, onSettle]);
 
+    useEffect(() => {
+        const feedItem = feed[currentFeedIndex];
+        if (feedItem) {
+            setCurrentUploadId(feedItem.id);
+        }
+    }, [currentFeedIndex, feed, setCurrentUploadId]);
+
     return (
         <div className={"relative h-full"}>
             <Carousel
@@ -57,15 +66,12 @@ export function HomeFeed() {
                 setApi={setApi}
             >
                 <CarouselContent>
-                    {feed.map((upload) => (
+                    {feed.map((upload, index) => (
                         <CarouselItem
                             key={`upload-${upload.id}-${upload.occurrence.getTime()}`}
                             className="relative"
                         >
-                            <Upload
-                                upload={upload}
-                                currentUploadId={feed[currentSlide].id}
-                            />
+                            <Upload upload={upload} carouselIndex={index} />
                         </CarouselItem>
                     ))}
                 </CarouselContent>

@@ -18,25 +18,25 @@ import { FeedItem } from "@/components/feed/FeedItem.ts";
 
 type Props = {
     upload: FeedItem;
-    currentUploadId: number;
+    carouselIndex: number;
 };
 
-export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
+export const Upload: FC<Props> = ({ upload, carouselIndex }) => {
     const { tags, isLoading, comments, revalidate } = useUploadInfo(upload.id);
 
     const slot = useMemo(() => {
         if (upload.type === "video") {
             return (
                 <Video
-                    currentUploadId={currentUploadId}
                     uploadId={upload.id}
                     src={upload.src}
+                    carouselIndex={carouselIndex}
                 />
             );
         }
 
         return <Image src={upload.src} />;
-    }, [currentUploadId, upload.id, upload.src, upload.type]);
+    }, [carouselIndex, upload.id, upload.src, upload.type]);
 
     return (
         <Drawer>
