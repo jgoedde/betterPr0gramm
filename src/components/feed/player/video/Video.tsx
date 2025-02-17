@@ -78,6 +78,29 @@ export const Video: FC<{
         setIsLoading(false);
     }, []);
 
+    const handleVisibilityChange = useCallback(() => {
+        if (document.hidden) {
+            pause();
+        }
+    }, [pause]);
+
+    useEffect(
+        function pauseVideoOnVisibilityChange() {
+            document.addEventListener(
+                "visibilitychange",
+                handleVisibilityChange
+            );
+
+            return () => {
+                document.removeEventListener(
+                    "visibilitychange",
+                    handleVisibilityChange
+                );
+            };
+        },
+        [handleVisibilityChange, pause]
+    );
+
     if (hasError) {
         return (
             <div className={"flex flex-col items-center space-y-2"}>
