@@ -4,6 +4,8 @@ import { buildCookiesHeader, Cookies, useAuth } from "@/hooks/use-auth.ts";
 import { Fetcher } from "swr";
 import { Comment } from "@/components/feed/comments/Comment.ts";
 import { Tag } from "@/components/feed/player/Tag.ts";
+import { useMemo } from "react";
+import { orderBy } from "lodash";
 
 type TagResponse = { id: number; confidence: number; tag: string };
 type CommentResponse = {
@@ -79,11 +81,15 @@ export function useUploadInfo(uploadId: number) {
     }
 
     function toTag(res: TagResponse): Tag {
-        return { name: res.tag, id: res.id };
+        return { name: res.tag, id: res.id, confidence: res.confidence };
     }
 
+    const tags = useMemo(() => {
+        return orderBy((data?.tags ?? []).map(toTag), "confidence", "desc");
+    }, [data?.tags]);
+
     return {
-        tags: (data?.tags ?? []).map(toTag),
+        tags,
         comments: (data?.comments ?? []).map(toComment),
         isLoading,
         revalidate: () => mutate(),

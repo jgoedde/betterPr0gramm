@@ -11,18 +11,17 @@ enum ContentMask {
 
 export type FeedPreferences = {
     contentType: number;
-    feed: "beliebt" | "neu";
 };
 
 const DEFAULT: FeedPreferences = {
     contentType: ContentMask.SFW,
-    feed: "beliebt",
 };
 
 export function usePreferences() {
     const [preferences, setPreferences] = useLocalStorage<FeedPreferences>({
         key: "betterPr0gramm-feed",
         defaultValue: DEFAULT,
+        getInitialValueInEffect: false,
     });
 
     const setContentType = useCallback(
@@ -35,19 +34,8 @@ export function usePreferences() {
         [setPreferences]
     );
 
-    const setFeed = useCallback(
-        (feed: FeedPreferences["feed"]) => {
-            setPreferences((prevState) => ({
-                ...prevState,
-                feed,
-            }));
-        },
-        [setPreferences]
-    );
-
     return {
         preferences: preferences, // Should not be undefined?
         setContentType,
-        setFeed,
     };
 }

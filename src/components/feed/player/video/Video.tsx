@@ -1,73 +1,167 @@
-import { FC, useCallback, useEffect } from "react";
-import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
-import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button.tsx";
+import { RefreshCcw } from "lucide-react";
+import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 export const Video: FC<{
     src: string;
     uploadId: number;
-    currentUploadId: number;
-}> = ({ src, uploadId, currentUploadId }) => {
-    const { resume, mute, unMute, isMuted, pause, isPlaying } =
-        useVideoControls();
+    carouselIndex: number;
+}> = ({ src, uploadId, carouselIndex }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-    const { shouldPlayAudio, videoRef, blurredVideoRef } = usePlaybackContext();
+    const [hasError, setHasError] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const {
+        currentUploadId,
+        isMuted,
+        play,
+        pause,
+        isPlaying,
+        currentFeedIndex,
+    } = useFeedContext();
+
+    useEffect(
+        function syncMuted() {
+            if (!videoRef.current) {
+                return;
+            }
+
+            videoRef.current.muted = isMuted;
+        },
+        [isMuted]
+    );
+
+    const onReloadButtonClick = useCallback(() => {
+        if (videoRef.current) {
+            setHasError(false);
+            setIsLoading(true);
+
+            videoRef.current.load();
+            play();
+        }
+    }, [play]);
 
     useEffect(() => {
         if (!videoRef.current) {
             return;
         }
 
-        if (shouldPlayAudio && isMuted) {
-            unMute();
-        }
-
-        if (!shouldPlayAudio && !isMuted) {
-            mute();
-        }
-    }, [isMuted, mute, shouldPlayAudio, unMute, videoRef]);
-
-    // This hook is responsible for pausing the video that we just swiped away and play the new one.
-    useEffect(() => {
         if (currentUploadId === uploadId) {
             // Autoplay after 200ms
             setTimeout(() => {
-                void resume();
+                if (!videoRef.current) {
+                    return;
+                }
+
+                void videoRef.current.play();
             }, 200);
         } else {
             // Pause the other video after swipe
-            pause();
+            videoRef.current.pause();
         }
-    }, [currentUploadId, pause, resume, uploadId]);
+    }, [currentUploadId, pause, play, uploadId]);
+
+    useEffect(
+        function syncPlaying() {
+            if (!videoRef.current) {
+                return;
+            }
+
+            if (currentUploadId !== uploadId) {
+                return;
+            }
+
+            if (isPlaying) {
+                void videoRef.current.play();
+            } else {
+                videoRef.current?.pause();
+            }
+        },
+        [currentUploadId, isPlaying, uploadId]
+    );
 
     const onVideoClick = useCallback(() => {
+        if (isLoading || !videoRef.current) {
+            return;
+        }
+
         if (isPlaying) {
             pause();
         } else {
-            void resume();
+            play();
         }
-    }, [isPlaying, pause, resume]);
+    }, [isLoading, isPlaying, pause, play]);
+
+    const onVideoError = useCallback(() => {
+        console.warn("Encountered an error while playing the video");
+        console.error(videoRef.current?.error?.code);
+
+        setHasError(true);
+        setIsLoading(false);
+    }, []);
+
+    const handleVisibilityChange = useCallback(() => {
+        if (document.hidden) {
+            videoRef.current?.pause();
+            pause();
+        }
+    }, [pause]);
+
+    useEffect(
+        function pauseVideoOnVisibilityChange() {
+            document.addEventListener(
+                "visibilitychange",
+                handleVisibilityChange
+            );
+
+            return () => {
+                document.removeEventListener(
+                    "visibilitychange",
+                    handleVisibilityChange
+                );
+            };
+        },
+        [handleVisibilityChange]
+    );
+
+    if (hasError) {
+        return (
+            <div className={"flex flex-col items-center space-y-2"}>
+                <div className={"text-white text-opacity-50"}>
+                    Oops... That video did not load :(
+                </div>
+                <Button
+                    variant={"outline"}
+                    size={"icon"}
+                    onClick={onReloadButtonClick}
+                >
+                    <RefreshCcw className={"text-white"} />
+                </Button>
+            </div>
+        );
+    }
+
+    if (currentFeedIndex - carouselIndex > 2) {
+        return <></>;
+    }
 
     return (
         <>
+            {isLoading && <FullScreenSpinner />}
             <video
                 ref={videoRef}
                 className="w-full h-full max-w-full max-h-full object-contain"
-                autoPlay
                 loop
-                muted={!shouldPlayAudio}
+                autoPlay
+                muted={isMuted}
                 playsInline
                 onClick={onVideoClick}
-            >
-                <source src={src} />
-            </video>
-            <video
-                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 -z-10"
-                autoPlay
-                loop
-                ref={blurredVideoRef}
-                muted
-                playsInline
-                onClick={onVideoClick}
+                onWaiting={() => setIsLoading(true)}
+                onCanPlay={() => setIsLoading(false)}
+                onError={onVideoError}
             >
                 <source src={src} />
             </video>

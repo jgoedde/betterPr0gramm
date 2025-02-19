@@ -11,6 +11,7 @@ import { useComments } from "@/components/feed/comments/context/CommentsContext.
 import { useVote } from "@/components/feed/player/use-vote.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
+import { Linkify } from "@/components/Linkify.tsx";
 
 type Props = {
     comment: Comment;
@@ -151,7 +152,9 @@ export const ThreadItem: FC<Props> = ({
                         })}
                     </span>
                 </div>
-                <div className="mb-2">{comment.content}</div>
+                <div className="mb-2">
+                    <Linkify text={comment.content} />
+                </div>
                 <div className="flex h-full space-x-2 w-full justify-between items-center">
                     <Button
                         variant={"link"}

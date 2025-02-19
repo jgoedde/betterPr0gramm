@@ -8,36 +8,35 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer.tsx";
-import { FeedItem } from "../use-doomscroll";
 import { Image } from "@/components/feed/player/image/Image.tsx";
 import { Video } from "@/components/feed/player/video/Video.tsx";
 import { CommentsDrawerContent } from "@/components/feed/comments/CommentsDrawerContent.tsx";
 import { CommentsContextProvider } from "@/components/feed/comments/context/CommentsContextProvider.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { CommentsLoadingSkeletons } from "@/components/feed/comments/CommentsLoadingSkeletons.tsx";
+import { FeedItem } from "@/components/feed/FeedItem.ts";
 
 type Props = {
     upload: FeedItem;
-    currentUploadId: number;
+    carouselIndex: number;
 };
 
-export const Upload: FC<Props> = ({ upload, currentUploadId }) => {
+export const Upload: FC<Props> = ({ upload, carouselIndex }) => {
     const { tags, isLoading, comments, revalidate } = useUploadInfo(upload.id);
 
     const slot = useMemo(() => {
         if (upload.type === "video") {
             return (
                 <Video
-                    key={`video-${upload.id}`}
-                    currentUploadId={currentUploadId}
                     uploadId={upload.id}
                     src={upload.src}
+                    carouselIndex={carouselIndex}
                 />
             );
         }
 
-        return <Image key={`image-${upload.id}`} src={upload.src} />;
-    }, [currentUploadId, upload.id, upload.src, upload.type]);
+        return <Image src={upload.src} />;
+    }, [carouselIndex, upload.id, upload.src, upload.type]);
 
     return (
         <Drawer>

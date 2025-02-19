@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { Tag } from "@/components/feed/player/Tag.ts";
 import {
     Popover,
@@ -17,6 +17,7 @@ type Props = { tag: Tag };
 export const TagPopover: FC<Props> = ({ tag }) => {
     const { isUp, isDown, upvote, downvote } = useVote();
     const { isAuthenticated, extractNonce, cookies } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
 
     const isUpvoted = useMemo(() => {
         return isUp("tags", tag.id);
@@ -51,16 +52,28 @@ export const TagPopover: FC<Props> = ({ tag }) => {
         const vote = upvote("tags", tag.id) === "up" ? 1 : 0;
 
         postVote(vote);
+
+        setTimeout(() => {
+            setIsOpen(false);
+        }, 500);
     }, [postVote, tag.id, upvote]);
 
     const onMinusIconClick = useCallback(() => {
         const vote = downvote("tags", tag.id) === "down" ? -1 : 0;
 
         postVote(vote);
+
+        setTimeout(() => {
+            setIsOpen(false);
+        }, 500);
     }, [downvote, postVote, tag.id]);
 
     return (
-        <Popover key={`popover-tag-${tag.id}`}>
+        <Popover
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            key={`popover-tag-${tag.id}`}
+        >
             <PopoverTrigger asChild>
                 <div
                     className={badgeVariants({

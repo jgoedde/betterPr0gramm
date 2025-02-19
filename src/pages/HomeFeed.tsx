@@ -5,43 +5,33 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel.tsx";
 import { Upload } from "@/components/feed/player/Upload.tsx";
-import { useDoomscroll } from "@/components/feed/use-doomscroll.ts";
+import { TAKE_POSTS, useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
-import { usePreferences } from "@/components/feed/use-preferences.ts";
 import { Spinner } from "@/components/ui/spinner.tsx";
-import { ContentTypeSelector } from "@/components/feed/ContentTypeSelector.tsx";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 import { VideoSeekbar } from "@/components/feed/player/overlay/VideoSeekbar.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
-    const [currentSlide, setCurrentSlide] = useState<number>(0);
-    const { preferences } = usePreferences();
-    const { feed, loadMore, isLoading } = useDoomscroll(
-        currentSlide,
-        preferences
-    );
-
-    useEffect(() => {
-        if (!api) {
-            return;
-        }
-
-        api.scrollTo(0);
-    }, [api, preferences.feed]);
+    const { currentFeedIndex, setCurrentFeedIndex, setCurrentUploadId } =
+        useFeedContext();
+    const { feed, loadMore, isLoading } = useDoomscroll(currentFeedIndex);
 
     /**
      * A slide animation was fulfilled. Either we jumped to the next or previous video/image.
      */
     const onSettle = useCallback(() => {
-        loadMore();
-    }, [loadMore]);
+        if (feed.length - currentFeedIndex < TAKE_POSTS) {
+            loadMore();
+        }
+    }, [currentFeedIndex, feed.length, loadMore]);
 
     const onSelect = useCallback(() => {
         if (!api) {
             return;
         }
-        setCurrentSlide(api.selectedScrollSnap());
-    }, [api]);
+        setCurrentFeedIndex(api.selectedScrollSnap());
+    }, [api, setCurrentFeedIndex]);
 
     useEffect(() => {
         if (!api) {
@@ -59,6 +49,13 @@ export function HomeFeed() {
         };
     }, [api, onSelect, onSettle]);
 
+    useEffect(() => {
+        const feedItem = feed[currentFeedIndex];
+        if (feedItem) {
+            setCurrentUploadId(feedItem.id);
+        }
+    }, [currentFeedIndex, feed, setCurrentUploadId]);
+
     return (
         <div className={"relative h-full"}>
             <Carousel
@@ -70,16 +67,12 @@ export function HomeFeed() {
                 setApi={setApi}
             >
                 <CarouselContent>
-                    {feed.map((upload) => (
+                    {feed.map((upload, index) => (
                         <CarouselItem
-                            key={`carousel-item-upload-${upload.id}`}
+                            key={`upload-${upload.id}-${upload.occurrence.getTime()}`}
                             className="relative"
                         >
-                            <Upload
-                                key={`upload-${upload.id}`}
-                                upload={upload}
-                                currentUploadId={feed[currentSlide].id}
-                            />
+                            <Upload upload={upload} carouselIndex={index} />
                         </CarouselItem>
                     ))}
                 </CarouselContent>
@@ -89,10 +82,6 @@ export function HomeFeed() {
                     <Spinner />
                 </div>
             )}
-            <div className={"absolute top-2 left-1/2 -translate-x-1/2"}>
-                <ContentTypeSelector />
-            </div>
-
             <div className={"absolute bottom-0 w-full"}>
                 <VideoSeekbar />
             </div>

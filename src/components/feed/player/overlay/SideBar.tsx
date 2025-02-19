@@ -2,7 +2,7 @@ import {
     MessageSquareMore,
     MinusCircle,
     PlusCircle,
-    Volume,
+    Volume2,
     VolumeOff,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
 import { Comment } from "@/components/feed/comments/Comment.ts";
-import { usePlaybackContext } from "@/hooks/use-playback-context.ts";
 import { Upload } from "@/components/feed/Upload.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 type Props = {
     uploadId: number;
@@ -33,7 +33,6 @@ export const SideBar: FC<Props> = ({
 }) => {
     const { isUp, downvote, upvote, isDown } = useVote();
     const { cookies, extractNonce, isAuthenticated } = useAuth();
-    const { shouldPlayAudio, setShouldPlayAudio } = usePlaybackContext();
 
     const postVote = useCallback(
         (vote: 1 | 0 | -1) => {
@@ -88,6 +87,8 @@ export const SideBar: FC<Props> = ({
         }
     }, [cookies, downvote, postVote, uploadId]);
 
+    const { isMuted, mute, unmute } = useFeedContext();
+
     return (
         <div className="absolute bottom-0 right-0 flex flex-col gap-1 z-10 p-2 text-white">
             <div className={"my-4"}>
@@ -130,16 +131,10 @@ export const SideBar: FC<Props> = ({
 
             {uploadType === "video" && (
                 <div className={"flex flex-col items-center justify-center"}>
-                    {shouldPlayAudio ? (
-                        <Volume
-                            size={33}
-                            onClick={() => setShouldPlayAudio(false)}
-                        />
+                    {isMuted ? (
+                        <VolumeOff onClick={unmute} size={33} />
                     ) : (
-                        <VolumeOff
-                            onClick={() => setShouldPlayAudio(true)}
-                            size={33}
-                        />
+                        <Volume2 size={33} onClick={mute} />
                     )}
                 </div>
             )}
