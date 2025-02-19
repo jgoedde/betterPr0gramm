@@ -121,7 +121,9 @@ export const LoginForm: FC = () => {
                             autoCapitalize={"on"}
                             type="text"
                             value={captchaStr}
-                            onChange={(e) => setCaptchaStr(e.target.value)}
+                            onChange={(e) =>
+                                setCaptchaStr(e.target.value.toUpperCase())
+                            }
                             name="captcha"
                             id="captcha"
                             required
