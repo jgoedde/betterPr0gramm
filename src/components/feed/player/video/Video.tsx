@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
-import { RefreshCcw } from "lucide-react";
+import { Play, RefreshCcw } from "lucide-react";
 import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
 import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 import { Emitter, emitter } from "@/emitter.ts";
@@ -197,6 +197,11 @@ export const Video: FC<{
     return (
         <>
             {isLoading && <FullScreenSpinner />}
+            {!isLoading && !isPlaying && !hasError && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-opacity-35">
+                    <Play size={44} />
+                </div>
+            )}
             <video
                 ref={videoRef}
                 className="w-full h-full max-w-full max-h-full object-contain"
