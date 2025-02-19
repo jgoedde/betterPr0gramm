@@ -9,6 +9,7 @@ import { TAKE_POSTS, useDoomscroll } from "@/components/feed/use-doomscroll.ts";
 import { useCallback, useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner.tsx";
 import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
+import { VideoSeekbar } from "@/components/feed/player/overlay/VideoSeekbar.tsx";
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
@@ -81,6 +82,7 @@ export function HomeFeed() {
                     <Spinner />
                 </div>
             )}
+            <VideoSeekbar />
         </div>
     );
 }

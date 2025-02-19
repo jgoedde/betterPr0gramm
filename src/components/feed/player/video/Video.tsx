@@ -1,8 +1,9 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
-import { RefreshCcw } from "lucide-react";
+import { Play, RefreshCcw } from "lucide-react";
 import { FullScreenSpinner } from "@/components/ui/spinner.tsx";
 import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
+import { Emitter, emitter } from "@/emitter.ts";
 
 export const Video: FC<{
     src: string;
@@ -10,6 +11,7 @@ export const Video: FC<{
     carouselIndex: number;
 }> = ({ src, uploadId, carouselIndex }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const updateCurrentTimeInterval = useRef<NodeJS.Timeout>();
 
     const [hasError, setHasError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +23,50 @@ export const Video: FC<{
         pause,
         isPlaying,
         currentFeedIndex,
+        setCurrentTime,
+        setVideoLengthSeconds,
     } = useFeedContext();
+
+    useEffect(
+        function setCurrentTimeOnSeekbarLetGo() {
+            const handleEvent = ({ seconds }: Emitter["seekbar-let-go"]) => {
+                if (!videoRef.current || currentUploadId !== uploadId) {
+                    return;
+                }
+
+                videoRef.current.currentTime = seconds;
+            };
+
+            emitter.on("seekbar-let-go", handleEvent);
+
+            return () => emitter.off("seekbar-let-go", handleEvent);
+        },
+        [currentUploadId, uploadId]
+    );
+
+    useEffect(
+        function syncCurrentTime() {
+            if (!videoRef.current || currentUploadId !== uploadId) {
+                return;
+            }
+
+            const updateCurrentTime = () => {
+                setCurrentTime(videoRef.current!.currentTime);
+            };
+
+            if (isPlaying) {
+                updateCurrentTimeInterval.current = setInterval(
+                    updateCurrentTime,
+                    500
+                );
+
+                return () => clearInterval(updateCurrentTimeInterval.current);
+            } else {
+                updateCurrentTime(); // Ensure last position is stored on pause
+            }
+        },
+        [isPlaying, currentUploadId, uploadId, setCurrentTime]
+    );
 
     useEffect(
         function syncMuted() {
@@ -57,12 +102,13 @@ export const Video: FC<{
                 }
 
                 void videoRef.current.play();
+                setVideoLengthSeconds(videoRef.current.duration);
             }, 200);
         } else {
             // Pause the other video after swipe
             videoRef.current.pause();
         }
-    }, [currentUploadId, pause, play, uploadId]);
+    }, [currentUploadId, pause, play, setVideoLengthSeconds, uploadId]);
 
     useEffect(
         function syncPlaying() {
@@ -151,6 +197,11 @@ export const Video: FC<{
     return (
         <>
             {isLoading && <FullScreenSpinner />}
+            {!isLoading && !isPlaying && !hasError && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-opacity-35">
+                    <Play size={44} />
+                </div>
+            )}
             <video
                 ref={videoRef}
                 className="w-full h-full max-w-full max-h-full object-contain"
