@@ -3,12 +3,15 @@ import {
     FeedContext,
     IFeedContext,
 } from "@/components/feed/context/FeedContext.ts";
+import { emitter } from "@/emitter.ts";
 
 export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [currentFeedIndex, setCurrentFeedIndex] = useState(0);
     const [isMuted, setIsMuted] = useState(true);
     const [currentUploadId, setCurrentUploadId] = useState<number>();
     const [isPlaying, setIsPlaying] = useState(true);
+    const [currentTime, setCurrentTime] = useState<number>();
+    const [videoLengthSeconds, setVideoLengthSeconds] = useState<number>();
 
     const mute = useCallback(() => {
         setIsMuted(true);
@@ -26,6 +29,13 @@ export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setIsPlaying(true);
     }, []);
 
+    const jumpToSecond: IFeedContext["jumpToSecond"] = useCallback((sec) => {
+        emitter.emit("seekbar-let-go", { seconds: sec });
+
+        setCurrentTime(sec);
+        setIsPlaying(true);
+    }, []);
+
     const value: IFeedContext = useMemo(() => {
         return {
             currentFeedIndex,
@@ -38,16 +48,24 @@ export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
             isPlaying,
             setCurrentFeedIndex,
             setCurrentUploadId,
+            videoLengthSeconds,
+            currentTime: currentTime,
+            setCurrentTime: setCurrentTime,
+            jumpToSecond,
+            setVideoLengthSeconds,
         };
     }, [
         currentFeedIndex,
         currentUploadId,
         isMuted,
         isPlaying,
+        jumpToSecond,
         mute,
         pause,
         play,
+        currentTime,
         unmute,
+        videoLengthSeconds,
     ]);
 
     return (

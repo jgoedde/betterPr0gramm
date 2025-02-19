@@ -1,20 +1,63 @@
-import { FC } from "react";
-import { useVideoControls } from "@/components/feed/player/video/use-video-controls.tsx";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider.tsx";
+import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 export const VideoSeekbar: FC = () => {
-    const { jumpToSecond } = useVideoControls();
+    const { jumpToSecond, videoLengthSeconds, currentTime, isPlaying } =
+        useFeedContext();
+
+    const [wasPlaying, setWasPlaying] = useState(false);
+    const [value, setValue] = useState(0);
+    const [isUserSeeking, setIsUserSeeking] = useState(false); // Track user interaction
+
+    useEffect(() => {
+        if (isPlaying) {
+            setWasPlaying(true); // Mark that the video was playing
+        }
+    }, [isPlaying]);
+
+    useEffect(() => {
+        if (!videoLengthSeconds || isUserSeeking || !currentTime) {
+            return;
+        }
+
+        setValue(currentTime);
+    }, [currentTime, videoLengthSeconds, isUserSeeking]);
+
+    const onSliderValueChange = useCallback(([second]: number[]) => {
+        setValue(second);
+        setIsUserSeeking(true);
+    }, []);
+
+    const onSliderValueCommit = useCallback(
+        ([second]: number[]) => {
+            setIsUserSeeking(false);
+            setValue(second);
+            jumpToSecond(second);
+        },
+        [jumpToSecond]
+    );
+
+    if (videoLengthSeconds == null) {
+        return <></>;
+    }
 
     return (
-        <Slider
-            onValueCommit={(j) => {
-                const seconds = j[0]; // 0 because we have no range here...
-                jumpToSecond(seconds);
-            }}
-            defaultValue={[0]}
-            max={100}
-            step={1}
-            className={"w-full"}
-        />
+        <div
+            className={`absolute bottom-0 w-full ${
+                wasPlaying && isPlaying
+                    ? "opacity-0 transition-opacity duration-500"
+                    : "opacity-100"
+            }`}
+        >
+            <Slider
+                onValueChange={onSliderValueChange}
+                onValueCommit={onSliderValueCommit}
+                max={videoLengthSeconds}
+                value={[value]}
+                step={1}
+                className={"w-full"}
+            />
+        </div>
     );
 };

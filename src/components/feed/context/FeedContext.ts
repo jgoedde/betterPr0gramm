@@ -7,6 +7,11 @@ export interface IFeedContext {
     setCurrentUploadId: (id: number) => void;
     isMuted: boolean;
     isPlaying: boolean;
+    jumpToSecond: (sec: number) => void;
+    currentTime?: number;
+    setCurrentTime: (sec: number) => void;
+    videoLengthSeconds?: number;
+    setVideoLengthSeconds: (val: number) => void;
     mute: VoidFunction;
     unmute: VoidFunction;
     pause: VoidFunction;

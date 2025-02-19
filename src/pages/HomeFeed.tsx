@@ -82,9 +82,7 @@ export function HomeFeed() {
                     <Spinner />
                 </div>
             )}
-            <div className={"absolute bottom-0 w-full"}>
-                <VideoSeekbar />
-            </div>
+            <VideoSeekbar />
         </div>
     );
 }
