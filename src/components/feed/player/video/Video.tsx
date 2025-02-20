@@ -86,6 +86,8 @@ export const Video: FC<{
 
             videoRef.current.load();
             play();
+        } else {
+            location.reload();
         }
     }, [play]);
 
