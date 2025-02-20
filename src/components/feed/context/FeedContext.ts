@@ -1,10 +1,11 @@
 import { createContext, useContext } from "react";
+import { FeedItem } from "@/components/feed/FeedItem.ts";
 
 export interface IFeedContext {
-    currentUploadId?: number;
+    currentUpload?: FeedItem;
     currentFeedIndex: number;
     setCurrentFeedIndex: (index: number) => void;
-    setCurrentUploadId: (id: number) => void;
+    setCurrentUpload: (upload: FeedItem) => void;
     isMuted: boolean;
     isPlaying: boolean;
     jumpToSecond: (sec: number) => void;

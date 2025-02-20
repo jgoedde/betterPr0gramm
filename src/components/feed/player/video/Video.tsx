@@ -17,7 +17,7 @@ export const Video: FC<{
     const [isLoading, setIsLoading] = useState(true);
 
     const {
-        currentUploadId,
+        currentUpload,
         isMuted,
         play,
         pause,
@@ -30,7 +30,7 @@ export const Video: FC<{
     useEffect(
         function setCurrentTimeOnSeekbarLetGo() {
             const handleEvent = ({ seconds }: Emitter["seekbar-let-go"]) => {
-                if (!videoRef.current || currentUploadId !== uploadId) {
+                if (!videoRef.current || currentUpload?.id !== uploadId) {
                     return;
                 }
 
@@ -41,12 +41,12 @@ export const Video: FC<{
 
             return () => emitter.off("seekbar-let-go", handleEvent);
         },
-        [currentUploadId, uploadId]
+        [currentUpload?.id, uploadId]
     );
 
     useEffect(
         function syncCurrentTime() {
-            if (!videoRef.current || currentUploadId !== uploadId) {
+            if (!videoRef.current || currentUpload?.id !== uploadId) {
                 return;
             }
 
@@ -65,7 +65,7 @@ export const Video: FC<{
                 updateCurrentTime(); // Ensure last position is stored on pause
             }
         },
-        [isPlaying, currentUploadId, uploadId, setCurrentTime]
+        [isPlaying, currentUpload?.id, uploadId, setCurrentTime]
     );
 
     useEffect(
@@ -94,7 +94,7 @@ export const Video: FC<{
             return;
         }
 
-        if (currentUploadId === uploadId) {
+        if (currentUpload?.id === uploadId) {
             // Autoplay after 200ms
             setTimeout(() => {
                 if (!videoRef.current) {
@@ -108,7 +108,7 @@ export const Video: FC<{
             // Pause the other video after swipe
             videoRef.current.pause();
         }
-    }, [currentUploadId, pause, play, setVideoLengthSeconds, uploadId]);
+    }, [currentUpload?.id, play, setVideoLengthSeconds, uploadId]);
 
     useEffect(
         function syncPlaying() {
@@ -116,7 +116,7 @@ export const Video: FC<{
                 return;
             }
 
-            if (currentUploadId !== uploadId) {
+            if (currentUpload?.id !== uploadId) {
                 return;
             }
 
@@ -126,7 +126,7 @@ export const Video: FC<{
                 videoRef.current?.pause();
             }
         },
-        [currentUploadId, isPlaying, uploadId]
+        [currentUpload?.id, isPlaying, uploadId]
     );
 
     const onVideoClick = useCallback(() => {

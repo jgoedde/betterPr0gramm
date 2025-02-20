@@ -13,7 +13,7 @@ import { VideoSeekbar } from "@/components/feed/player/overlay/VideoSeekbar.tsx"
 
 export function HomeFeed() {
     const [api, setApi] = useState<CarouselApi>();
-    const { currentFeedIndex, setCurrentFeedIndex, setCurrentUploadId } =
+    const { currentFeedIndex, setCurrentFeedIndex, setCurrentUpload } =
         useFeedContext();
     const { feed, loadMore, isLoading } = useDoomscroll(currentFeedIndex);
 
@@ -52,9 +52,9 @@ export function HomeFeed() {
     useEffect(() => {
         const feedItem = feed[currentFeedIndex];
         if (feedItem) {
-            setCurrentUploadId(feedItem.id);
+            setCurrentUpload(feedItem);
         }
-    }, [currentFeedIndex, feed, setCurrentUploadId]);
+    }, [currentFeedIndex, feed, setCurrentUpload]);
 
     return (
         <div className={"relative h-full"}>

@@ -3,8 +3,13 @@ import { Slider } from "@/components/ui/slider.tsx";
 import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
 
 export const VideoSeekbar: FC = () => {
-    const { jumpToSecond, videoLengthSeconds, currentTime, isPlaying } =
-        useFeedContext();
+    const {
+        jumpToSecond,
+        videoLengthSeconds,
+        currentTime,
+        isPlaying,
+        currentUpload,
+    } = useFeedContext();
 
     const [wasPlaying, setWasPlaying] = useState(false);
     const [value, setValue] = useState(0);

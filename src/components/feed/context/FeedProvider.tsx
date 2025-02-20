@@ -4,11 +4,12 @@ import {
     IFeedContext,
 } from "@/components/feed/context/FeedContext.ts";
 import { emitter } from "@/emitter.ts";
+import { FeedItem } from "@/components/feed/FeedItem.ts";
 
 export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [currentFeedIndex, setCurrentFeedIndex] = useState(0);
     const [isMuted, setIsMuted] = useState(true);
-    const [currentUploadId, setCurrentUploadId] = useState<number>();
+    const [currentUpload, setCurrentUpload] = useState<FeedItem>();
     const [isPlaying, setIsPlaying] = useState(true);
     const [currentTime, setCurrentTime] = useState<number>();
     const [videoLengthSeconds, setVideoLengthSeconds] = useState<number>();
@@ -44,10 +45,10 @@ export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
             play,
             unmute,
             isMuted,
-            currentUploadId,
+            currentUpload,
             isPlaying,
             setCurrentFeedIndex,
-            setCurrentUploadId,
+            setCurrentUpload,
             videoLengthSeconds,
             currentTime: currentTime,
             setCurrentTime: setCurrentTime,
@@ -56,7 +57,7 @@ export const FeedProvider: FC<{ children: ReactNode }> = ({ children }) => {
         };
     }, [
         currentFeedIndex,
-        currentUploadId,
+        currentUpload,
         isMuted,
         isPlaying,
         jumpToSecond,
