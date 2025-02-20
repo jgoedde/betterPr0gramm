@@ -55,7 +55,7 @@ export const VideoSeekbar: FC = () => {
         <div
             className={`absolute bottom-0 w-full ${
                 wasPlaying && isPlaying
-                    ? "opacity-0 transition-opacity duration-500"
+                    ? "opacity-0 transition-opacity duration-1000"
                     : "opacity-100"
             }`}
         >
