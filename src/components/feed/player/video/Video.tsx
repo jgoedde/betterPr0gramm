@@ -101,7 +101,7 @@ export const Video: FC<{
                     return;
                 }
 
-                void videoRef.current.play();
+                play();
                 setVideoLengthSeconds(videoRef.current.duration);
             }, 200);
         } else {
