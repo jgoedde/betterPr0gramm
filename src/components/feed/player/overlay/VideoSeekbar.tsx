@@ -43,6 +43,10 @@ export const VideoSeekbar: FC = () => {
         [jumpToSecond]
     );
 
+    if (currentUpload?.type !== "video") {
+        return <></>;
+    }
+
     if (videoLengthSeconds == null) {
         return <></>;
     }
