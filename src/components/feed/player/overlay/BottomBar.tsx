@@ -1,16 +1,32 @@
 import { Tag } from "@/components/feed/player/Tag.ts";
 import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { FC, useMemo } from "react";
+import { FC, ReactNode, useCallback, useMemo, useState } from "react";
 import { TagPopover } from "@/components/feed/player/overlay/TagPopover.tsx";
+import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
+import { Badge } from "@/components/ui/badge.tsx";
+import { Plus } from "lucide-react";
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
 
 type Props = {
-    loading: boolean;
-    tags: Tag[];
     uploader: string;
+    uploadId: number;
 };
 
-export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
+export const BottomBar: FC<Props> = ({ uploader, uploadId }) => {
+    const { tags, isLoading: loading } = useUploadInfo(uploadId);
+
     const topTag = useMemo(() => {
         const tag = tags[0]?.name;
         if (tag == null) {
@@ -55,8 +71,51 @@ export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
                     {otherTags.map((t) => (
                         <TagPopover key={t.id} tag={t} />
                     ))}
+                    <TagDrawer
+                        trigger={
+                            <Badge>
+                                <Plus size={12} />
+                            </Badge>
+                        }
+                    />
                 </div>
             </div>
         </div>
+    );
+};
+
+const TagDrawer: FC<{ trigger: ReactNode }> = ({ trigger }) => {
+    const [tag, setTag] = useState("");
+
+    const onConfirm = useCallback(() => {}, []);
+
+    return (
+        <Drawer>
+            <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+            <DrawerContent className={"text-primary"}>
+                <DrawerHeader>
+                    <DrawerTitle>Taggen</DrawerTitle>
+                    <DrawerDescription>
+                        Füge einen oder mehrere Tags zu [uploader]'s Hochlad
+                        hinzu.
+                    </DrawerDescription>
+                </DrawerHeader>
+                <div className={"p-4"}>
+                    <Input
+                        type={"text"}
+                        value={tag}
+                        onChange={(e) => setTag(e.target.value)}
+                    />
+                </div>
+                <DrawerFooter>
+                    <DrawerClose asChild>
+                        <Button onClick={onConfirm}>cool</Button>
+                    </DrawerClose>
+                    <DrawerClose asChild>
+                        <Button variant="outline">Abbrechen</Button>
+                    </DrawerClose>
+                </DrawerFooter>
+            </DrawerContent>
+        </Drawer>
     );
 };
