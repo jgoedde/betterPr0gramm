@@ -22,7 +22,7 @@ type Props = {
 };
 
 export const Upload: FC<Props> = ({ upload, carouselIndex }) => {
-    const { tags, isLoading, comments, revalidate } = useUploadInfo(upload.id);
+    const { isLoading, comments, revalidate } = useUploadInfo(upload.id);
 
     const slot = useMemo(() => {
         if (upload.type === "video") {
@@ -64,16 +64,10 @@ export const Upload: FC<Props> = ({ upload, carouselIndex }) => {
                     )}
                 </CommentsContextProvider>
             </DrawerContent>
-            <BottomBar
-                tags={tags}
-                loading={isLoading}
-                uploader={upload.uploaderName}
-            />
+            <BottomBar uploader={upload.uploaderName} uploadId={upload.id} />
             <SideBar
                 uploadId={upload.id}
                 benis={upload.benis}
-                isLoading={isLoading}
-                comments={comments as never[]}
                 uploadType={upload.type}
             />
 

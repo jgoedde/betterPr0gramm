@@ -3,14 +3,16 @@ import { cn } from "@/lib/utils.ts";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { FC, useMemo } from "react";
 import { TagPopover } from "@/components/feed/player/overlay/TagPopover.tsx";
+import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 
 type Props = {
-    loading: boolean;
-    tags: Tag[];
     uploader: string;
+    uploadId: number;
 };
 
-export const BottomBar: FC<Props> = ({ loading, tags, uploader }) => {
+export const BottomBar: FC<Props> = ({ uploader, uploadId }) => {
+    const { tags, isLoading: loading } = useUploadInfo(uploadId);
+
     const topTag = useMemo(() => {
         const tag = tags[0]?.name;
         if (tag == null) {

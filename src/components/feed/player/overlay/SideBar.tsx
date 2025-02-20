@@ -11,26 +11,20 @@ import { useVote } from "@/components/feed/player/use-vote.ts";
 import { cn } from "@/lib/utils.ts";
 import { buildCookiesHeader, useAuth } from "@/hooks/use-auth.ts";
 import { DrawerTrigger } from "@/components/ui/drawer.tsx";
-import { Comment } from "@/components/feed/comments/Comment.ts";
 import { Upload } from "@/components/feed/Upload.ts";
 import { BASE_URL } from "@/api/pr0grammApi.ts";
 import { useFeedContext } from "@/components/feed/context/FeedContext.ts";
+import { useUploadInfo } from "@/components/feed/use-upload-info.ts";
 
 type Props = {
     uploadId: number;
     benis: number;
-    isLoading: boolean;
-    comments: Comment[];
     uploadType: Upload["type"];
 };
 
-export const SideBar: FC<Props> = ({
-    uploadId,
-    benis,
-    comments,
-    isLoading,
-    uploadType,
-}) => {
+export const SideBar: FC<Props> = ({ uploadId, benis, uploadType }) => {
+    const { comments, isLoading } = useUploadInfo(uploadId);
+
     const { isUp, downvote, upvote, isDown } = useVote();
     const { cookies, extractNonce, isAuthenticated } = useAuth();
 
