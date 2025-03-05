@@ -98,8 +98,8 @@ export function useDoomscroll(currentIndex: number) {
     }, [next]);
 
     useEffect(() => {
-        if (feed[currentIndex]) {
-            markAsSeen(feed[currentIndex].id);
+        if (feed[currentIndex - 1]) {
+            markAsSeen(feed[currentIndex - 1].id);
         }
     }, [currentIndex, feed, markAsSeen]);
 
