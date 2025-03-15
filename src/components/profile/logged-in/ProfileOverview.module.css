@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .stat {
     @apply flex flex-col items-center;
 
