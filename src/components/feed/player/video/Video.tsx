@@ -201,7 +201,7 @@ export const Video: FC<{
             {isLoading && <FullScreenSpinner />}
             {!isLoading && !isPlaying && !hasError && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-opacity-35">
-                    <Play size={44} />
+                    <Play onClick={onVideoClick} size={44} />
                 </div>
             )}
             <video
